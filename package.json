@@ -1,0 +1,41 @@
+{
+  "name": "proget-universal-bower-resolver",
+  "version": "0.1.0",
+  "description": "The ProGet Universal Bower resolver",
+  "main": "./lib/index.js",
+  "keywords": [
+    "bower-resolver"
+  ],
+  "author": "Alexandre Beaudoin <alexandre.beaudoin@wolterskluwer.com>",
+  "license": "MIT",
+  "dependencies": {
+    "adm-zip": "^0.4.7",
+    "bluebird": "^3.4.0",
+    "mout": "^1.0.0",
+    "request": "^2.72.0",
+    "retry": "^0.10.0",
+    "semver": "^5.2.0",
+    "tmp": "^0.0.29"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "^3.6.0",
+    "istanbul": "^0.4.3",
+    "jsdoc": "^3.4.0",
+    "jshint": "^2.9.2",
+    "minami": "^1.1.1",
+    "mocha": "^3.0.0",
+    "rimraf": "^2.5.2"
+  },
+  "scripts": {
+    "coverage": "istanbul cover node_modules/mocha/bin/_mocha -R ./test/*.test.js",
+    "jsDoc": "jsdoc --configure .jsdoc.json --verbose",
+    "lint": "eslint lib/",
+    "lintTest": "eslint test/",
+    "test": "npm run lint & npm run lintTest & npm run unit && npm run coverage",
+    "unit": "mocha -R spec test/*.test.js"
+  },
+  "engines": {
+    "node": ">=4"
+  }
+}

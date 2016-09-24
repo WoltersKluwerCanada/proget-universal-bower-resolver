@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>index.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-createError.html">createError</a><ul class='methods'><li data-type='method'><a href="module-createError.html#~createError">createError</a></li></ul></li><li><a href="module-download.html">download</a><ul class='methods'><li data-type='method'><a href="module-download.html#~download">download</a></li></ul></li><li><a href="module-extract.html">extract</a><ul class='methods'><li data-type='method'><a href="module-extract.html#~extract">extract</a></li></ul></li><li><a href="module-index.html">index</a><ul class='methods'><li data-type='method'><a href="module-index.html#~fetch">fetch</a></li><li data-type='method'><a href="module-index.html#~locate">locate</a></li><li data-type='method'><a href="module-index.html#~match">match</a></li><li data-type='method'><a href="module-index.html#~releases">releases</a></li></ul></li><li><a href="module-request.html">request</a><ul class='methods'><li data-type='method'><a href="module-request.html#~communication">communication</a></li><li data-type='method'><a href="module-request.html#~findFeedId">findFeedId</a></li><li data-type='method'><a href="module-request.html#~req">req</a></li></ul></li><li><a href="module-utils.html">utils</a><ul class='methods'><li data-type='method'><a href="module-utils.html#~extractRefs">extractRefs</a></li><li data-type='method'><a href="module-utils.html#~extractReleases">extractReleases</a></li><li data-type='method'><a href="module-utils.html#~registryParser">registryParser</a></li><li data-type='method'><a href="module-utils.html#~releases">releases</a></li><li data-type='method'><a href="module-utils.html#~tags">tags</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">index.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
+
+/**
+ * Main module.
+ * @module index
+ */
+
+// Prepare the temp module
+const tmp = require("tmp");
+tmp.setGracefulCleanup();
+
+const download = require("./download");
+const extract = require("./extract");
+const request = require("./request");
+const utils = require("./utils");
+
+/**
+ * Main module section
+ *
+ * @param {{logger: {}, version: string, config: {proget: {group: string, apiKey: string, feedId: number}}}} bower
+ * @return {*}
+ */
+module.exports = function resolver(bower) {
+    return {
+        /**
+         * Tells Bower whether to use or not use this resolver for some source.
+         *
+         * @returns {boolean|Promise} - Tells whether resolver can handle given source
+         */
+        match: function(source) {
+            if (source.indexOf(bower.config.proget.server) > -1) {
+                // Is the URL address of the ProGet server
+                return true;
+            } else if (/^(https?|ssh|git):\/\/.*/.test(source)) {
+                // Is the URL address of an other server
+                return false;
+            } else {
+                // Is the short form and need to be validated against the feed packages
+                return request(utils.registryParser(source, bower.config), "ProGetPackages_GetPackages", bower.config).then(
+                    (response) => {
+                        try {
+                            return JSON.parse(response).length > 0;
+                        } catch (e) {
+                            return false;
+                        }
+                    },
+                    () => {
+                        return false;
+                    }
+                );
+            }
+        },
+
+        /**
+         * Allows to implement simplified registry
+         *
+         * @param {string} source - Source from bower.json
+         * @returns {string} - Resolved source string
+         */
+        locate(source) {
+            if (/^https?:\/\/.*/.test(source)) {
+                return source;
+            } else {
+                return utils.registryParser(source, bower.config);
+            }
+        },
+
+        /**
+         * Bower selects one matching version from the result and passes matching target field to fetch method.
+         *
+         * @param {string} source - Source from bower.json
+         * @returns {Promise}
+         */
+        releases(source) {
+            return request(source, "ProGetPackages_GetPackageVersions", bower.config).then((response) => {
+                return utils.extractReleases(response);
+            });
+        },
+
+        /**
+         * Downloads given endpoint and returns path to temporary directory
+         *
+         * @param {{name: string, source: string, target: string}} endpoint - Endpoint for the resource to download
+         * @param {{}} cached  - Contains information about cached resource
+         * @param {endpoint} cached.endpoint - Endpoint of cached resource
+         * @param {string} cached.release - The must plausible cache version
+         * @param {Array} [cached.releases] - The version available in cache
+         * @param {string} cached.version - Present cached resource has been resolved as version
+         * @param {string|{}} cached.resolution - The “resolution” returned from previous fetch call for same resource
+         * @returns {Promise}
+         */
+        fetch(endpoint, cached) {
+            if (cached.version !== endpoint.target) {
+                return request(endpoint.source, "Feeds_GetFeed", bower.config).then((feed) => {
+                    let Feed_Name = JSON.parse(feed).Feed_Name,
+                        adrInfo = endpoint.source.split("?"),
+                        params = adrInfo[1].split("/");
+
+                    // Url ex: http://&lt;yourProget.com>/upack/&lt;universal-feed-name>/download/&lt;groupName>/&lt;packageName>/&lt;0.0.0>
+                    let downloadUrl = `${adrInfo[0]}/upack/${Feed_Name}/download/${params[1] || "bower"}/${params[2]}/${endpoint.target}`,
+                        downloadPath = tmp.dirSync({unsafeCleanup: true});
+
+                    return download(downloadUrl, downloadPath.name, bower.config).then((archivePatch) => {
+                        let extractPath = tmp.dirSync({unsafeCleanup: true});
+
+                        return extract(archivePatch, extractPath.name).then(() => {
+                            downloadPath.removeCallback();
+
+                            process.on("exit", ()=> {
+                                extractPath.removeCallback();
+                            });
+
+                            return {
+                                tempPath: extractPath.name,
+                                removeIgnores: true
+                            };
+                        });
+                    });
+                });
+            }
+        }
+    };
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.1</a> on Sun Sep 25 2016 13:00:12 GMT-0400 (Est (heure d’été)) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

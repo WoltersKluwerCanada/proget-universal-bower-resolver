@@ -1,0 +1,10 @@
+
+/.jshintrc
+/.jsdoc.json
+/.istanbul.yml
+/test/
+/docs/
+/.idea/
+/.testResult/
+/node_modules/
+*.iml

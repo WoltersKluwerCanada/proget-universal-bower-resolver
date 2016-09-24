@@ -1,0 +1,8 @@
+
+/.idea/
+/proget-universal-bower-resolver.iml
+/node_modules/
+/npm-debug.log
+/.testResult/
+/test/data/extract/
+/test/data/download/
