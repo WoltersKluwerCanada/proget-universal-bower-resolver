@@ -1,5 +1,4 @@
 
-/.jshintrc
 /.jsdoc.json
 /.istanbul.yml
 /test/
@@ -8,3 +7,5 @@
 /.testResult/
 /node_modules/
 *.iml
+/.eslintrc.js
+/.eslintignore
