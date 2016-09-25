@@ -2,10 +2,18 @@
   "name": "proget-universal-bower-resolver",
   "version": "0.1.0",
   "description": "The ProGet Universal Bower resolver",
-  "main": "./lib/index.js",
+  "main": "lib/index.js",
   "keywords": [
-    "bower-resolver"
+    "bower-resolver",
+    "proget"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WoltersKluwerCanada/proget-universal-bower-resolver"
+  },
+  "bugs": {
+    "url": "https://github.com/WoltersKluwerCanada/proget-universal-bower-resolver/issues"
+  },
   "author": "Alexandre Beaudoin <alexandre.beaudoin@wolterskluwer.com>",
   "license": "MIT",
   "dependencies": {
