@@ -1,4 +1,4 @@
-[![dependencies Status](https://david-dm.org/WoltersKluwerCanada/proget-universal-bower-resolver/status.svg)](https://david-dm.org/WoltersKluwerCanada/proget-universal-bower-resolver)
+[![dependencies Status](https://david-dm.org/WoltersKluwerCanada/proget-universal-bower-resolver/status.svg)](https://david-dm.org/WoltersKluwerCanada/proget-universal-bower-resolver) [![Build Status](https://travis-ci.org/WoltersKluwerCanada/proget-universal-bower-resolver.svg?branch=master)](https://travis-ci.org/WoltersKluwerCanada/proget-universal-bower-resolver) [![Coverage Status](https://coveralls.io/repos/github/WoltersKluwerCanada/proget-universal-bower-resolver/badge.svg?branch=master)](https://coveralls.io/github/WoltersKluwerCanada/proget-universal-bower-resolver?branch=master)
 
 # ProGet Universal Bower Resolver
 
