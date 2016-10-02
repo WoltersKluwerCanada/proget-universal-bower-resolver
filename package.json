@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "coveralls": "^2.11.14",
     "eslint": "^3.6.0",
     "istanbul": "^0.4.3",
     "jsdoc": "^3.4.0",
@@ -37,6 +38,7 @@
   },
   "scripts": {
     "coverage": "istanbul cover node_modules/mocha/bin/_mocha -R ./test/*.test.js",
+    "coveralls": "istanbul cover node_modules/mocha/bin/_mocha -R ./test/*.test.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "jsDoc": "jsdoc --configure .jsdoc.json --verbose",
     "lint": "eslint lib/",
     "lintTest": "eslint test/",
