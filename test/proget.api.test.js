@@ -4,19 +4,19 @@ const chai = require("chai");
 const expect = chai.expect;
 const share = require("./data/share");
 const server = require("./data/fakeHtttpServer");
-
-const request = require("../lib/request");
+const proget = require("../lib/progetApi");
 
 // Test the Request module methods
-describe("request", () => {
+describe("proget.api.test", () => {
     before((done) => {
         server.startServer(done);
+        this.api = proget.createApi(share.bowerConfig);
     });
 
     // Test request use at step releases
     describe("ProGetPackages_GetPackageVersions", () => {
         it("with feed id", (done) => {
-            request(`${share.testAddress}?23/groupName/packageName`, "ProGetPackages_GetPackageVersions", share.bowerConfig).then(
+            this.api.getPackageVersions(`${share.testAddress}?23/groupName/packageName`).then(
                 function(rep) {
                     expect(rep).equal(share.expectedRequestAnswer.forPkgInfo);
                     done();
@@ -28,7 +28,7 @@ describe("request", () => {
         });
 
         it("with feed name", (done) => {
-            request(`${share.testAddress}?feedName/groupName/packageName`, "ProGetPackages_GetPackageVersions", share.bowerConfig).then(
+            this.api.getPackageVersions(`${share.testAddress}?feedName/groupName/packageName`).then(
                 function(rep) {
                     expect(rep).equal(share.expectedRequestAnswer.forPkgInfo);
                     done();
@@ -42,7 +42,7 @@ describe("request", () => {
 
     // Test request use at step fetch
     it("Feeds_GetFeed", (done) => {
-        request(`${share.testAddress}?23`, "Feeds_GetFeed", share.bowerConfig).then(
+        this.api.getFeeds(`${share.testAddress}?23`).then(
             function(rep) {
                 expect(rep).equal(share.expectedRequestAnswer.forFeedInfo);
                 done();
