@@ -42,6 +42,7 @@
     "jsDoc": "jsdoc --configure .jsdoc.json --verbose",
     "lint": "eslint lib/",
     "lintTest": "eslint test/",
+    "lintAllFix": "eslint lib/ --fix & eslint test/ --fix",
     "test": "npm run lint & npm run lintTest & npm run unit && npm run coverage",
     "unit": "mocha -R spec test/*.test.js"
   },
