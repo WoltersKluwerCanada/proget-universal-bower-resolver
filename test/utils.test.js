@@ -8,24 +8,6 @@ const utils = require("../lib/utils");
 
 // Test the Utils module methods
 describe("utils", () => {
-    // Test the extractReleases method
-    it("extractReleases", () => {
-        let out = utils.extractReleases(share.expectedRequestAnswer.forPkgInfo);
-
-        expect(out).eql([
-            {
-                "release": "1.1.1",
-                "target": "1.1.1",
-                "version": "1.1.1"
-            },
-            {
-                "release": "2.2.2",
-                "target": "2.2.2",
-                "version": "2.2.2"
-            }
-        ]);
-    });
-
     // Test the registryParser method
     describe("registryParser", () => {
         let c = share.bowerConfig.proget;
