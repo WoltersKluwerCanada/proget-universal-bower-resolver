@@ -25,7 +25,7 @@ describe("download", () => {
 
     // Download a file from the fake server
     it("a file", (done) => {
-        download(`${share.testAddress}/upack/feedName/download/groupName/packageName/version`, testFolder, share.bowerConfig).then(
+        download(`${share.testAddress}/upack/feedName/download/bower/packageName/version`, testFolder, share.bowerConfig).then(
             function() {
                 fs.readdir(testFolder, (err, files) => {
                     if (err) {
@@ -55,7 +55,7 @@ describe("download", () => {
 
     // Download the file from a fake server but with wrong transfer size
     it("simulate a transfer error", (done) => {
-        download(`${share.testAddress}/upack/feedName/download/groupName/packageName/version.WrongSize`, testFolder, share.bowerConfig).then(
+        download(`${share.testAddress}/upack/feedName/download/bower/packageName/version.WrongSize`, testFolder, share.bowerConfig).then(
             function() {
                 done(new Error("Error: This test is suppose to fail because the file we download is is smaller than the header tell."));
             },
@@ -69,7 +69,7 @@ describe("download", () => {
 
     // HTTP error code when communicate with server
     it("simulate a HTML error response", (done) => {
-        download(`${share.testAddress}/upack/feedName/download/groupName/packageName/version.BadHtmlCode`, testFolder, share.bowerConfig).then(
+        download(`${share.testAddress}/upack/feedName/download/bower/packageName/version.BadHtmlCode`, testFolder, share.bowerConfig).then(
             function() {
                 done(new Error("Error: This test is suppose to fail because the file we download is is smaller than the header tell."));
             },

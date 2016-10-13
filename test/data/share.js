@@ -3,8 +3,6 @@
 const fs = require("fs");
 const rimraf = require("rimraf");
 
-const PROGET_PREFIX = require("../../lib/utils").PROGET_PREFIX;
-
 // Server information
 const testPort = "8080";
 const testApiKey = "banana";
@@ -70,10 +68,8 @@ const bowerConfig = {
     color: true,
     resolvers: ["proget-universal-bower-resolver"],
     proget: {
-        server: `http://localhost:${testPort}`,
-        apiKey: testApiKey,
-        feed: 23,
-        group: "bower"
+        registries:[`http://localhost:${testPort}/upack/23`, `http://localhost:${testPort}/upack/42`],
+        apiKeyMapping: JSON.parse(`{"http://localhost:${testPort}":"${testApiKey}"}`)
     },
     interactive: true,
     argv: {
@@ -84,7 +80,7 @@ const bowerConfig = {
 };
 
 const expectedRequestAnswer = {
-    forPkgInfo: JSON.stringify([{
+    forPkgInfo1: JSON.stringify([{
         "ProGetPackage_Id": 1,
         "Version_Text": "1.1.1",
         "PackageHash_Bytes": "ebXlcWOoY4x6J9qY8S4z5QuSp/o=",
@@ -103,9 +99,39 @@ const expectedRequestAnswer = {
         "Download_Count": 11,
         "Cached_Indicator": false
     }]),
-    forFeedInfo: JSON.stringify({
+    forPkgInfo2: JSON.stringify([{
+        "ProGetPackage_Id": 1,
+        "Version_Text": "1.1.1",
+        "PackageHash_Bytes": "ebXlcWOoY4x6J9qY8S4z5QuSp/o=",
+        "PackageMetadata_Bytes": "eyJ0aXRsZSI6InBrZyIsImRlc2NyaXB0aW9uIjoiQSBjcmF6eSBib3dlciBwYWNrYWdlISJ9",
+        "Published_Date": "2016-06-01T07:03:15.600",
+        "Package_Size": 20231,
+        "Download_Count": 7,
+        "Cached_Indicator": false
+    }, {
+        "ProGetPackage_Id": 1,
+        "Version_Text": "3.3.3",
+        "PackageHash_Bytes": "6BY64NQaFzEdw2zQjckBRlRUc20=",
+        "PackageMetadata_Bytes": "eyJ0aXRsZSI6InBrZyIsImRlc2NyaXB0aW9uIjoiQSBjcmF6eSBib3dlciBwYWNrYWdlISJ9",
+        "Published_Date": "2016-06-01T07:03:15.700",
+        "Package_Size": 20235,
+        "Download_Count": 11,
+        "Cached_Indicator": false
+    }]),
+    forFeedInfo1: JSON.stringify({
         "Feed_Id": 23,
         "Feed_Name": "feedName",
+        "Feed_Description": null,
+        "Active_Indicator": true,
+        "Cache_Connectors_Indicator": true,
+        "DropPath_Text": null,
+        "FeedPathOverride_Text": null,
+        "FeedType_Name": "ProGet",
+        "PackageStoreConfiguration_Xml": null
+    }),
+    forFeedInfo2: JSON.stringify({
+        "Feed_Id": 42,
+        "Feed_Name": "wk-develop-bower",
         "Feed_Description": null,
         "Active_Indicator": true,
         "Cache_Connectors_Indicator": true,
@@ -117,7 +143,6 @@ const expectedRequestAnswer = {
 };
 
 module.exports = {
-    PROGET_PREFIX,
     createTestFolder,
     deleteTestFolder,
     testPort,

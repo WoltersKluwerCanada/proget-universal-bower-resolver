@@ -17,44 +17,13 @@ describe("index", () => {
     describe("match", () => {
         it("full matching url", () => {
             let c = share.bowerConfig.proget;
-            expect(index.match(`${c.server}/${c.feed}/${c.group}/packageName`)).to.be.true;
+            let url = c.registries[0].split("/upack/");
+            expect(index.match(`${url[0]}/${url[1]}/bower/packageName`)).to.be.true;
         });
 
         describe("partial matching url", () => {
             it("package only", (done) => {
                 index.match("packageName").then(
-                    (data) => {
-                        try {
-                            expect(data).to.be.true;
-                            done();
-                        } catch (e) {
-                            done(e);
-                        }
-                    },
-                    (err) => {
-                        done(err);
-                    }
-                );
-            });
-
-            it("package and group", (done) => {
-                index.match(`${share.bowerConfig.proget.group}/packageName`).then(
-                    (data) => {
-                        try {
-                            expect(data).to.be.true;
-                            done();
-                        } catch (e) {
-                            done(e);
-                        }
-                    },
-                    (err) => {
-                        done(err);
-                    }
-                );
-            });
-
-            it("feed, group and package", (done) => {
-                index.match(`${share.bowerConfig.proget.feed}/${share.bowerConfig.proget.group}/packageName`).then(
                     (data) => {
                         try {
                             expect(data).to.be.true;
@@ -94,33 +63,29 @@ describe("index", () => {
     // Test the locate method
     describe("locate", () => {
         let c = share.bowerConfig.proget;
+        let url = c.registries[0].split("/upack/");
 
         describe("partial src", () => {
-            it("package only", () => {
-                expect(index.locate("packageName")).equal(`${c.server}?${c.feed}/${c.group || "bower"}/packageName`);
-            });
-
-            it("package and group", () => {
-                expect(index.locate("groupName/packageName")).equal(`${c.server}?${c.feed}/groupName/packageName`);
-            });
-
-            it("feed, group and package", () => {
-                expect(index.locate("feed/groupName/packageName")).equal(`${c.server}?feed/groupName/packageName`);
+            it("package only", (done) => {
+                index.locate("packageName").then((data)=>{
+                    expect(data).equal(`${url[0]}?${url[1]}/bower/packageName`);
+                    done();
+                });
             });
         });
 
         it("full source", ()=> {
-            expect(index.locate("proget.test?feed/groupName/packageName")).equal("proget.test?feed/groupName/packageName");
+            expect(index.locate("proget.test?feed/bower/packageName")).equal("proget.test?feed/bower/packageName");
         });
 
         it("full source from IP", ()=> {
-            expect(index.locate("1.2.3.4?feed/groupName/packageName")).equal("1.2.3.4?feed/groupName/packageName");
+            expect(index.locate("1.2.3.4?feed/bower/packageName")).equal("1.2.3.4?feed/bower/packageName");
         });
     });
 
     // Test the releases method
     it("releases", (done) => {
-        index.releases(`${share.testAddress}?feedName/groupName/packageName`).then(
+        index.releases(`${share.testAddress}?feedName/bower/packageName`).then(
             function (res) {
                 try {
                     expect(res).eql([
@@ -151,7 +116,7 @@ describe("index", () => {
         let endpoint = {
             name: "packageName",
             target: "1.1.1",
-            source: `${share.testAddress}?feedName/groupName/packageName`,
+            source: `${share.testAddress}?feedName/bower/packageName`,
             registry: true
         };
 
