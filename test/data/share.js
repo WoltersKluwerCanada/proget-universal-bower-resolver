@@ -69,7 +69,7 @@ const bowerConfig = {
     resolvers: ["proget-universal-bower-resolver"],
     proget: {
         registries:[`http://localhost:${testPort}/upack/23`, `http://localhost:${testPort}/upack/42`],
-        apiKeyMapping: JSON.parse(`{"http://localhost:${testPort}":"${testApiKey}"}`)
+        apiKeyMapping: JSON.parse(`[{"server":"http://localhost:${testPort}","key":"${testApiKey}"}]`)
     },
     interactive: true,
     argv: {

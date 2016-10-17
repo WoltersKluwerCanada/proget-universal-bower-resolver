@@ -65,15 +65,6 @@ describe("index", () => {
         let c = share.bowerConfig.proget;
         let url = c.registries[0].split("/upack/");
 
-        describe("partial src", () => {
-            it("package only", (done) => {
-                index.locate("packageName").then((data)=>{
-                    expect(data).equal(`${url[0]}?${url[1]}/bower/packageName`);
-                    done();
-                });
-            });
-        });
-
         it("full source", ()=> {
             expect(index.locate("proget.test?feed/bower/packageName")).equal("proget.test?feed/bower/packageName");
         });

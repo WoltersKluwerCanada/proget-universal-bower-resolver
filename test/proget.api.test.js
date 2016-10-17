@@ -59,21 +59,6 @@ describe("proget.api.test", () => {
                 }
             );
         });
-
-        it("all versions", (done) => {
-            this.api.getPackagesAll("packageName").then(
-                function(rep) {
-                    expect(rep.length).equal(3);
-                    expect("1.1.1").equal(rep[0].Version_Text);
-                    expect("2.2.2").equal(rep[1].Version_Text);
-                    expect("3.3.3").equal(rep[2].Version_Text);
-                    done();
-                },
-                function(err) {
-                    done(err);
-                }
-            );
-        });
     });
 
 
