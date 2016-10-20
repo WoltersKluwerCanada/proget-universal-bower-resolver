@@ -8,21 +8,21 @@ const server = require("./data/fakeHtttpServer");
 const index = require("../lib/index")({config: share.bowerConfig});
 
 // Test the Main module methods
-describe("index", () => {
-    before((done) => {
+describe("index", function() {
+    before(function(done) {
         server.startServer(done);
     });
 
     // Test the match method
-    describe("match", () => {
-        it("full matching url", () => {
+    describe("match", function() {
+        it("full matching url", function() {
             let c = share.bowerConfig.proget;
             let url = c.registries[0].split("/upack/");
             expect(index.match(`${url[0]}/${url[1]}/bower/packageName`)).to.be.true;
         });
 
-        describe("partial matching url", () => {
-            it("package only", (done) => {
+        describe("partial matching url", function() {
+            it("package only", function(done) {
                 index.match("packageName").then(
                     (data) => {
                         try {
@@ -39,11 +39,11 @@ describe("index", () => {
             });
         });
 
-        it("full not matching url", () => {
+        it("full not matching url", function() {
             expect(index.match("http://something-random.test")).to.be.false;
         });
 
-        it("partial not matching url", (done) => {
+        it("partial not matching url", function(done) {
             index.match("angular").then(
                 (data) => {
                     try {
@@ -61,23 +61,20 @@ describe("index", () => {
     });
 
     // Test the locate method
-    describe("locate", () => {
-        let c = share.bowerConfig.proget;
-        let url = c.registries[0].split("/upack/");
-
-        it("full source", ()=> {
+    describe("locate", function() {
+        it("full source", function() {
             expect(index.locate("proget.test?feed/bower/packageName")).equal("proget.test?feed/bower/packageName");
         });
 
-        it("full source from IP", ()=> {
+        it("full source from IP", function() {
             expect(index.locate("1.2.3.4?feed/bower/packageName")).equal("1.2.3.4?feed/bower/packageName");
         });
     });
 
     // Test the releases method
-    it("releases", (done) => {
+    it("releases", function(done) {
         index.releases(`${share.testAddress}?feedName/bower/packageName`).then(
-            function (res) {
+            (res) => {
                 try {
                     expect(res).eql([
                         {
@@ -96,14 +93,14 @@ describe("index", () => {
                     done(e);
                 }
             },
-            function (err) {
+            (err) => {
                 done(err);
             }
         );
     });
 
     // Test the fetch method
-    describe("fetch", () => {
+    describe("fetch", function() {
         let endpoint = {
             name: "packageName",
             target: "1.1.1",
@@ -112,7 +109,7 @@ describe("index", () => {
         };
 
         // Try like if bower have not already the package in cache
-        it("without cached version", (done) => {
+        it("without cached version", function(done) {
             let cached = {
                 endpoint: endpoint,
                 release: "1.1.1",
@@ -120,20 +117,20 @@ describe("index", () => {
             };
 
             index.fetch(endpoint, cached).then(
-                function (res) {
+                (res) => {
                     expect(res.hasOwnProperty("tempPath")).to.be.true;
                     expect(res.hasOwnProperty("removeIgnores")).to.be.true;
 
                     done();
                 },
-                function (err) {
+                (err) => {
                     done(err);
                 }
             );
         });
 
         // Try like if bower already have the package in cache
-        it("with version in cache", () => {
+        it("with version in cache", function() {
             let cached = {
                 endpoint: endpoint,
                 release: "1.1.1",
@@ -148,7 +145,7 @@ describe("index", () => {
         });
     });
 
-    after((done) => {
+    after(function(done) {
         server.stopServer(done);
     });
 });

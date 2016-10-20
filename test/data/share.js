@@ -79,6 +79,11 @@ const bowerConfig = {
     }
 };
 
+/**
+ * The result we were expecting as response from the server
+ *
+ * @type {{forPkgInfo1: string, forPkgInfo2: string, forFeedInfo1: string, forFeedInfo2: string}}
+ */
 const expectedRequestAnswer = {
     forPkgInfo1: JSON.stringify([{
         "ProGetPackage_Id": 1,
