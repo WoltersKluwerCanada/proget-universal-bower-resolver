@@ -10,10 +10,10 @@ const server = require("./data/fakeHtttpServer");
 const download = require("../lib/download");
 
 // Test the Download module methods
-describe("download", () => {
+describe("download", function() {
     let testFolder = path.join(__dirname, "data", "download");
 
-    before((done) => {
+    before(function(done) {
         share.createTestFolder(testFolder, (err)=> {
             if (err) {
                 done(err);
@@ -24,9 +24,9 @@ describe("download", () => {
     });
 
     // Download a file from the fake server
-    it("a file", (done) => {
-        download(`${share.testAddress}/upack/feedName/download/groupName/packageName/version`, testFolder, share.bowerConfig).then(
-            function() {
+    it("a file", function(done) {
+        download(`${share.testAddress}/upack/feedName/download/bower/packageName/version`, testFolder, share.bowerConfig).then(
+            () => {
                 fs.readdir(testFolder, (err, files) => {
                     if (err) {
                         done(err);
@@ -47,19 +47,19 @@ describe("download", () => {
                     }
                 });
             },
-            function(err) {
+            (err) => {
                 done(err);
             }
         );
     });
 
     // Download the file from a fake server but with wrong transfer size
-    it("simulate a transfer error", (done) => {
-        download(`${share.testAddress}/upack/feedName/download/groupName/packageName/version.WrongSize`, testFolder, share.bowerConfig).then(
-            function() {
+    it("simulate a transfer error", function(done) {
+        download(`${share.testAddress}/upack/feedName/download/bower/packageName/version.WrongSize`, testFolder, share.bowerConfig).then(
+            () => {
                 done(new Error("Error: This test is suppose to fail because the file we download is is smaller than the header tell."));
             },
-            function(err) {
+            (err) => {
                 expect(err).match(/^Error: Transfer closed with .* bytes remaining to read$/);
                 expect(err).a("Error");
                 done();
@@ -68,12 +68,12 @@ describe("download", () => {
     });
 
     // HTTP error code when communicate with server
-    it("simulate a HTML error response", (done) => {
-        download(`${share.testAddress}/upack/feedName/download/groupName/packageName/version.BadHtmlCode`, testFolder, share.bowerConfig).then(
-            function() {
+    it("simulate a HTML error response", function(done) {
+        download(`${share.testAddress}/upack/feedName/download/bower/packageName/version.BadHtmlCode`, testFolder, share.bowerConfig).then(
+            () => {
                 done(new Error("Error: This test is suppose to fail because the file we download is is smaller than the header tell."));
             },
-            function(err) {
+            (err) => {
                 expect(err).match(/^Error: Status code of 400 for .*$/);
                 expect(err).a("Error");
                 done();
@@ -82,7 +82,7 @@ describe("download", () => {
     });
 
     // Delete the test folder after usage
-    after((done) => {
+    after(function(done) {
         share.deleteTestFolder(testFolder, done);
     });
 });

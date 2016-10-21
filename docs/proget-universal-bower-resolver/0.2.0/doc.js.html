@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>doc.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module-progetApi-ProgetApi.html">ProgetApi</a><ul class='methods'><li data-type='method'><a href="module-progetApi-ProgetApi.html#.extractReleases">extractReleases</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#.urlToKey">urlToKey</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#communicate">communicate</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#fillCache">fillCache</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#findFeedId">findFeedId</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#generatePossibleUrl">generatePossibleUrl</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#getFeedDetails">getFeedDetails</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#getPackagesSingle">getPackagesSingle</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#getPackageVersions">getPackageVersions</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#isSupportedServer">isSupportedServer</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#locatePackage">locatePackage</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#sendRequest">sendRequest</a></li><li data-type='method'><a href="module-progetApi-ProgetApi.html#supportsPackage">supportsPackage</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-createError.html">createError</a><ul class='methods'><li data-type='method'><a href="module-createError.html#~createError">createError</a></li></ul></li><li><a href="module-download.html">download</a><ul class='methods'><li data-type='method'><a href="module-download.html#~download">download</a></li></ul></li><li><a href="module-extract.html">extract</a><ul class='methods'><li data-type='method'><a href="module-extract.html#~extract">extract</a></li></ul></li><li><a href="module-index.html">index</a><ul class='methods'><li data-type='method'><a href="module-index.html#~fetch">fetch</a></li><li data-type='method'><a href="module-index.html#~isSourceUrl">isSourceUrl</a></li><li data-type='method'><a href="module-index.html#~locate">locate</a></li><li data-type='method'><a href="module-index.html#~match">match</a></li><li data-type='method'><a href="module-index.html#~releases">releases</a></li></ul></li><li><a href="module-progetApi.html">progetApi</a><ul class='methods'><li data-type='method'><a href="module-progetApi.html#~extractRefs">extractRefs</a></li><li data-type='method'><a href="module-progetApi.html#~releases">releases</a></li><li data-type='method'><a href="module-progetApi.html#~tags">tags</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">doc.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// This file is here to contain global JsDoc definitions
+
+// Global bowerObj doc
+/**
+ * @typedef {{}} bowerObj
+ * @property {bowerLogger} logger - the Bower logger
+ * @property {bowerConf} config - The Bower configuration
+ * @property {string} version - Bower’s version that instantiates resolver
+ */
+
+/**
+ * @typedef {{}} bowerLogger
+ * @property {function} [error] - Alias to .log('error', id, message, data)
+ * @property {function} [conflict] - Alias to .log('conflict', id, message, data)
+ * @property {function} [warn] - Alias to .log('warn', id, message, data)
+ * @property {function} [action] - Alias to .log('action', id, message, data)
+ * @property {function} [info] - Alias to .log('info', id, message, data)
+ * @property {function} [debug] - Alias to .log('debug', id, message, data)
+ * @property {function} [log] - Emits a log event
+ * @property {function} [prompt] - Emits a prompt event with an array of prompts with a callback
+ * @property {function} [pipe] - Pipes all logger events to another logger.
+ * @property {function} [geminate] - Creates a new logger that pipes events to the parent logger.
+ * @property {function} [intercept] - Intercepts log events, calling fn before listeners of the instance.
+ */
+
+/**
+ * @typedef {{}} bowerConf
+ * @property {string} httpsProxy
+ * @property {string} proxy
+ * @property {ca} ca
+ * @property {boolean} strictSsl
+ * @property {number} timeout
+ * @property {string} request
+ * @property {progetConf} proget
+ * @property {number} [retry]
+ */
+
+/**
+ * @typedef {{}} ca
+ * @property {Array} search
+ */
+
+// Global progetConf doc
+/**
+ * @typedef {{}} progetConf
+ * @property {string} group
+ * @property {string} apiKey
+ * @property {string} feedId
+ */
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Fri Oct 21 2016 11:15:36 GMT-0400 (Est (heure d’été)) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

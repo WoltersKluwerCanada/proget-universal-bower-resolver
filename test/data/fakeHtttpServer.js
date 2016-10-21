@@ -64,23 +64,23 @@ function parseQuery(query) {
 function router(request, response) {
     let query = url.parse(request.url).query;
 
-    if (request.method === "GET" && (request.url === "/upack/feedName/download/groupName/packageName/version" || request.url === "/upack/feedName/download/groupName/packageName/1.1.1")) {
+    if (request.method === "GET" && (request.url === "/upack/feedName/download/bower/packageName/version" || request.url === "/upack/feedName/download/bower/packageName/1.1.1")) {
         // Download
         responseToDownload(response);
-    } else if (request.method === "GET" && request.url === "/upack/feedName/download/groupName/packageName/version.WrongSize") {
+    } else if (request.method === "GET" && request.url === "/upack/feedName/download/bower/packageName/version.WrongSize") {
         // Download with file size error
         responseToDownloadWrongSize(response);
-    } else if (request.method === "GET" && request.url === "/upack/feedName/download/groupName/packageName/version.BadHtmlCode") {
+    } else if (request.method === "GET" && request.url === "/upack/feedName/download/bower/packageName/version.BadHtmlCode") {
         // Download with file size error
         responseHtmlError(response);
     } else {
-        let data = parseQuery(query),
-            split = request.url.split("?"),
-            partial = split[0],
-            param = split[1];
+        let data = parseQuery(query);
+        let split = request.url.split("?");
+        let partial = split[0];
+        let params = split[1].split("&");
 
         if (data.API_Key === share.testApiKey) {
-            if (request.method === "GET" && (partial === "/api/json/ProGetPackages_GetPackageVersions" || param === "API_Key=banana&Feed_Id=23&Group_Name=bower&Package_Name=packageName")) {
+            if (request.method === "GET" && (partial === "/api/json/ProGetPackages_GetPackageVersions" || partial === "/api/json/ProGetPackages_GetPackages") && params.some((x)=>x.split("=")[1] === "packageName")) {
                 responseToRequest(response, data);
             } else if (request.method === "GET" && partial === "/api/json/Feeds_GetFeed") {
                 responseToGetFeed(response, data);
@@ -132,8 +132,12 @@ function responseHtmlError(response) {
 function responseToRequest(response, data) {
     if (data.Feed_Id === "23") {
         response.writeHead(200, header.getFeed);
-        response.end(share.expectedRequestAnswer.forPkgInfo);
-    } else {
+        response.end(share.expectedRequestAnswer.forPkgInfo1);
+    } if (data.Feed_Id === "42") {
+        response.writeHead(200, header.getFeed);
+        response.end(share.expectedRequestAnswer.forPkgInfo2);
+    }
+    else {
         response.writeHead(200, header.getFeed);
         response.end();
     }
@@ -148,10 +152,16 @@ function responseToRequest(response, data) {
 function responseToGetFeed(response, data) {
     if (data.Feed_Id === "23") {
         response.writeHead(200, header.getFeed);
-        response.end(share.expectedRequestAnswer.forFeedInfo);
+        response.end(share.expectedRequestAnswer.forFeedInfo1);
     } else if (data.Feed_Name === "feedName") {
         response.writeHead(200, header.getFeed);
-        response.end(share.expectedRequestAnswer.forFeedInfo);
+        response.end(share.expectedRequestAnswer.forFeedInfo1);
+    } else if (data.Feed_Id === "42") {
+        response.writeHead(200, header.getFeed);
+        response.end(share.expectedRequestAnswer.forFeedInfo2);
+    } else if (data.Feed_Name === "wk-develop-bower") {
+        response.writeHead(200, header.getFeed);
+        response.end(share.expectedRequestAnswer.forFeedInfo2);
     } else {
         response.writeHead(200, header.getFeed);
         response.end();

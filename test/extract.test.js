@@ -9,20 +9,20 @@ const share = require("./data/share");
 const extract = require("../lib/extract");
 
 // Test the Extract module methods
-describe("extract", () => {
+describe("extract", function() {
     let testFolder = path.join(__dirname, "data", "extract");
 
-    before((done) => {
+    before(function(done) {
         share.createTestFolder(testFolder, done);
     });
 
     // Try to extract a zip archive, must fail
-    it("extract an zip (Error)", (done) => {
+    it("extract an zip (Error)", function(done) {
         extract(path.join(__dirname, "data", "empty.zip"), testFolder).then(
-            function() {
+            () => {
                 done(new Error("Err: Extract is not suppose to accept zip files."));
             },
-            function(err) {
+            (err) => {
                 expect(err).match(/^Error: File .*\.zip is not a known archive$/);
                 expect(err).a("Error");
                 done();
@@ -31,9 +31,9 @@ describe("extract", () => {
     });
 
     // Extract an .upack archive
-    it("extract an upack", (done) => {
+    it("extract an upack", function(done) {
         extract(path.join(__dirname, "data", "pkg.upack"), testFolder).then(
-            function() {
+            () => {
                 // Validate that the content was extracted
                 fs.readdir(testFolder, (err, files) => {
                     if (err) {
@@ -69,13 +69,13 @@ describe("extract", () => {
                     }
                 });
             },
-            function(err) {
+            (err) => {
                 done(err);
             }
         );
     });
 
-    after((done) => {
+    after(function(done) {
         share.deleteTestFolder(testFolder, done);
     });
 });

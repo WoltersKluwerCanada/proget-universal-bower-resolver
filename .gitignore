@@ -6,3 +6,4 @@
 /test/data/extract/
 /test/data/download/
 /coverage/
+*.tgz
