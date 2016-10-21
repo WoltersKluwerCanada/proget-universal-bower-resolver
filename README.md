@@ -2,10 +2,10 @@
 
 # ProGet Universal Bower Resolver
 
-This Bower resolver allow you to download and install archives from a ProGet Universal Feed like any Bower package.
+This Bower resolver allows you to download and install archives from a ProGet Universal Feed like any Bower package.
 
 ## Install
-This tool can be install globally
+This tool can be installed globally
 ```
 npm install -g proget-universal-bower-resolver
 ```
@@ -17,14 +17,21 @@ npm install proget-universal-bower-resolver
 ## How To Use
 
 Add/modify the `.bowerrc` file:
-```text
+```javascript
 {
     [...]
     "proget": {
+        /* For simple ProGet server configuration  */
         "server": "http(s)://<String>",
-        "apiKey": "<String>",
-        "feed": "<Number|String>",
-        "group": "<String; default: bower>"
+        "apiKey": "<String>"
+        /* For multiple ProGet server configuration */
+        "apiKeyMapping": [
+            {
+                "server": "http(s)://<String>",
+                "key" : "<String>"
+            }
+            /* [...] */
+        ]
     },
     "resolvers": [
         "proget-universal-bower-resolver"
@@ -34,12 +41,13 @@ Add/modify the `.bowerrc` file:
 
 Where:
 
-| key           | Description | Require | Default Value |
-|---------------|-------------|---------|---------------|
-| proget.server | Is the address to the ProGet server. | YES | |
-| proget.apiKey | Is the API_Key use to communicate with the API. | YES | |
-| proget.feed   | Is the `ID` or the `name` of the feed. | YES | |
-| proget.group  | Is the group of the package. | NO | `"bower"` |
+| Key                         | Description                                                         | Require                                              |
+|-----------------------------|---------------------------------------------------------------------|------------------------------------------------------|
+| proget.server               | Is the address to the ProGet server.                                | NO only if `proget.apiKeyMapping` is set             |
+| proget.apiKey               | Is the API_Key use to communicate with the API.                     | NO only if `proget.apiKeyMapping` is set             |
+| proget.apiKeyMapping.server | Is the address to a ProGet server.                                  | At least one object if `proget.apiKeyMapping` is set |
+| proget.apiKeyMapping.Key    | Is the API_Key use to communicate with the API of the above server. | At least one object if `proget.apiKeyMapping` is set |
+
 
 And the way to create your dependencies is like you normally will do:
 ```text
@@ -60,7 +68,7 @@ If you want to rename your packages write the dependence as normal:
 {
     [...],
     "dependencies": {
-        <new_package_name>": ""<pkg_name>#<version>",
+        "<new_package_name>": "<pkg_name>#<version>",
         [...]
     }
 }

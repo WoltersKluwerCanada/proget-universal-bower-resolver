@@ -10,7 +10,15 @@ const progetAPI = require("../lib/progetApi");
 describe("proget.api.test", function() {
     before(function(done) {
         server.startServer(done);
-        this.api = new progetAPI(share.bowerConfig);
+        this.api = new progetAPI({
+            config: share.bowerConfig,
+            version: "0.0.0",
+            logger: {
+                error: (id, message, data) => {
+                    return `id: ${id}\nmessage: ${message}\ndata: ${data}`;
+                }
+            }
+        });
     });
 
     // Test the extractReleases method
