@@ -19,7 +19,6 @@
   "dependencies": {
     "adm-zip": "^0.4.7",
     "bluebird": "^3.4.0",
-    "mout": "^1.0.0",
     "request": "^2.72.0",
     "retry": "^0.10.0",
     "semver": "^5.2.0",
