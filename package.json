@@ -22,7 +22,7 @@
     "request": "^2.72.0",
     "retry": "^0.10.0",
     "semver": "^5.2.0",
-    "tmp": "^0.0.29"
+    "tmp": "^0.0.30"
   },
   "devDependencies": {
     "chai": "^3.5.0",
