@@ -4,10 +4,12 @@ const chai = require("chai");
 const expect = chai.expect;
 const share = require("./data/share");
 const server = require("./data/fakeHtttpServer");
-const progetAPI = require("../lib/progetApi");
+const progetAPI = require("../lib/progetApi").default;
 
 // Test the Request module methods
 describe("proget.api.test", function() {
+    // let lastWarning;
+
     before(function(done) {
         server.startServer(done);
         this.api = new progetAPI({
@@ -20,6 +22,24 @@ describe("proget.api.test", function() {
             }
         });
     });
+
+    // beforeEach(function() {
+    //     lastWarning = "";
+    // });
+    //
+    // describe("validate source", function() {
+    //     it("good", function() {
+    //         expect()
+    //     });
+    //
+    //     it("warning", function() {
+    //
+    //     });
+    //
+    //     it("bad", function() {
+    //
+    //     });
+    // });
 
     // Test the extractReleases method
     it("extractReleases", function() {

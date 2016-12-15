@@ -1,0 +1,381 @@
+"use strict";
+
+/**
+ * Proget communication module.
+ * @module progetApi
+ */
+
+import * as request from "request";
+import * as semver from "semver";
+import * as Url  from "url";
+import createError from "./createError";
+
+/**
+ * Format a list of tags to be consume by Bower
+ *
+ * @param {Array} tags - List of semver validated tags
+ * @param {string} repository - The source from where theses tags were found
+ * @return {Array.<{release: string, target: string, version: string}>}
+ */
+function releases(tags: string[], repository: string): ReleaseTags[] {
+    if (!tags.length) {
+        return [];
+    }
+
+    return tags.map((tag) => {
+        return {
+            target: `${repository}#${tag}`,
+            version: tag
+        };
+    });
+}
+
+/**
+ * Validates that the references have semver format
+ *
+ * @param {Array} refs - List of tags
+ * @return {Array}
+ */
+function tags(refs: string[]): string[] {
+    return refs.filter((el) => {
+        return semver.valid(el);
+    });
+}
+
+/**
+ * Parse the server response in an array of consumable version strings
+ *
+ * @param {string} response - The server response
+ * @return {Array}
+ */
+function extractRefs(response: string): string[] {
+    let versions = [];
+    let data = {};
+
+    try {
+        data = JSON.parse(response);
+    } catch (e) {
+        throw e;
+    }
+
+    for (let pkg in data) {
+        if (data.hasOwnProperty(pkg) && data[pkg].hasOwnProperty("Version_Text")) {
+            versions.push(data[pkg].Version_Text);
+        }
+    }
+
+    return versions;
+}
+
+/**
+ * Class to communicate with ProGet
+ */
+class ProgetApi {
+    /**
+     * Test if the given source is in short format
+     *
+     * @param {string} source - The source to analyse
+     * @returns {boolean}
+     */
+    public static isShortFormat(source: string): boolean {
+        return !/.*:\\\\.*/.test(source);
+    }
+
+    /**
+     * Validate that the provide regex will only point to universal ProGet feeds
+     *
+     * @param {string} regex - The regex to validate
+     * @returns {boolean}
+     */
+    public static validateRegexScope(regex: string): boolean {
+        return /upack/.test(regex);
+    }
+
+    /**
+     * Parse the server response into bower understandable format when asking for package available version(s)
+     *
+     * @param {string} response - The server response
+     * @param {string} repository - The address from where the response was received
+     * @return {Array<ReleaseTags>}
+     */
+    public static extractReleases(response: string, repository: string): ReleaseTags[] {
+        return releases(tags(extractRefs(response)), repository);
+    }
+
+    private httpProxy: string;
+    private proxy: string;
+    private ca: Buffer;
+    private strictSSL: boolean = true;
+    private timeout: number;
+    private defaultRequest: string;
+    private cachedPackages: Object;
+    private logger: BowerLogger;
+    private conf: ProGetApiConf[];
+    private registries: string[] = [];
+
+    /**
+     * Prepare for communicating with ProGet
+     *
+     * @param {Bower} bower
+     */
+    constructor(bower: Bower) {
+        this.httpProxy = bower.config.httpsProxy;
+        this.proxy = bower.config.proxy;
+        this.ca = bower.config.ca.search[0];
+        this.strictSSL = bower.config.strictSsl;
+        this.timeout = bower.config.timeout;
+        this.defaultRequest = bower.config.request;
+        this.cachedPackages = {};
+        this.logger = bower.logger;
+
+        // Set config
+        if (!bower.config.proget.hasOwnProperty("apiKeyMapping")) {
+            throw createError(
+                "Missing entries in the 'apiKeyMapping' parameter in 'proget' group of Bower configuration.",
+                "EBOWERC"
+            );
+        } else {
+            for (let i = 0, j = bower.config.proget.apiKeyMapping.length; i < j; ++i) {
+                let mapping = bower.config.proget.apiKeyMapping[i];
+
+                if (!ProgetApi.validateRegexScope(mapping.server.toString())) {
+                    this.logger.warn("proget-universal-bower-resolver",
+                        `The regex ${mapping.server} may allow other feed type then ProGet Universal ones.` +
+                        `Please validate that your regex contain "upack" in it.`);
+                }
+                // Convert string parameters to regex
+                mapping.server = new RegExp(mapping.server);
+            }
+
+            this.conf = bower.config.proget.apiKeyMapping;
+        }
+
+        // Set registries
+        if (bower.config.registry.search.length === 0) {
+            throw createError(
+                "Missing entries in the 'registries' parameter in 'proget' group of Bower configuration.",
+                "EBOWERC"
+            );
+        } else {
+            for (let i = 0, j = bower.config.registry.search.length; i < j; i++) {
+                for (let k = 0, l = this.conf.length; k < l; ++k) {
+                    if (this.conf[k].server.test(bower.config.registry.search[i])) {
+                        this.registries.push(bower.config.registry.search[i]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if the source url has an API key in configuration
+     *
+     * @param {string} source - The URL to connect to
+     * @returns {boolean}
+     */
+    public isSupportedSource(source: string): boolean {
+        // Check if formatted in our config style
+        for (let i = 0, j = this.conf.length; i < j; ++i) {
+            if (this.conf[i].server.test(source)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * ProGet communication method
+     *
+     * @param {string} url - The URL to connect to
+     * @param {string} adr - The address to access
+     * @param {function} resolve - Promise success function
+     * @param {function} reject - Promise fail function
+     * @param {{}} params - Parameters use in the query
+     */
+    public communicate(url: string, adr: string, resolve: Function, reject: Function, params: Object) {
+        // TODO fix type above for params
+        let _request = request.defaults({
+            ca: this.ca,
+            proxy: Url.parse(url).protocol === "https:" ? this.httpProxy : this.proxy,
+            qs: params,
+            strictSSL: this.strictSSL,
+            timeout: this.timeout
+        });
+
+        _request = _request.defaults(this.defaultRequest || {});
+
+        _request(adr, (error, response, body) => {
+            if (error) {
+                reject(createError(`Request to ${url} failed: ${error.message}`, error.code));
+            } else {
+                if (response.statusCode === 200) {
+                    resolve(body);
+                } else {
+                    reject(createError(`Request to ${url} returned ${response.statusCode} status code.`, "EREQUEST", {
+                        details: `url: ${url}\nadr: ${adr}\n${JSON.stringify(response, null, 2)}`
+                    }));
+                }
+            }
+        });
+    }
+
+    /**
+     * Communicate with ProGet to get a feed ID from a name
+     *
+     * @param {string} url - The URL to connect to
+     * @param {function} resolve - The success function
+     * @param {function} reject - The reject function
+     * @param {{}} params - Parameters use in the query
+     */
+    public findFeedId(url: string, resolve: Function, reject: Function, params) {
+        // TODO fix type above for params
+        let reqID = url.split("/upack/")[0] + "/api/json/Feeds_GetFeed";
+
+        this.communicate(url, reqID, resolve, reject, {Feed_Name: params.Feed_Id, API_Key: params.API_Key});
+    }
+
+    /**
+     * Send request to ProGet
+     *
+     * @param {string} source - The URL to connect to
+     * @param {string} pkg - The package
+     * @param {string} apiMethod - The ProGet API method to use
+     * @returns {Promise}
+     */
+    public sendRequest(source: string, pkg: string, apiMethod: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            let rUrl = source.split("/upack/");
+            let adr = `${rUrl[0]}/api/json/${apiMethod}`;
+
+            let registry = this.conf.find((el) => {
+                return el.server.test(source);
+            });
+
+            if (registry) {
+                // Prepare the request
+                let params = {
+                    API_Key: registry.key || "",
+                    Feed_Id: rUrl[1],
+                    Group_Name: "bower",
+                    Package_Name: pkg
+                };
+
+                if (params.API_Key === "") {
+                    reject(createError(
+                        "Their is no 'apiKey' set on your system, please add one to you .bowerrc file. " +
+                        "Seed documentation for HowTo.",
+                        "EMISSAPIKEY")
+                    );
+                }
+
+                // Test if we have the id or the feed name
+                if (/^\d+$/.test(rUrl[1])) {
+                    // If we have an ID
+                    this.communicate(source, adr, resolve, reject, params);
+                } else {
+                    // If we have a name
+                    this.findFeedId(source, (data) => {
+                        if (data) {
+                            params.Feed_Id = JSON.parse(data).Feed_Id;
+                            this.communicate(source, adr, resolve, reject, params);
+                        } else {
+                            reject(createError(`Unable to found the Feed with the name ${params.Feed_Id}`, "EBOWERC"));
+                        }
+                    }, reject, params);
+                }
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    /**
+     * Acquire information from ProGet about a Feed
+     *
+     * @param {string} source - The URL to connect to
+     * @returns {Promise}
+     */
+    public getFeedDetails(source: string): Promise<any> {
+        return this.sendRequest(source, null, "Feeds_GetFeed").then(
+            (detailsJson: string) => {
+                if (detailsJson) {
+                    let details = JSON.parse(detailsJson);
+                    return {
+                        description: details.Feed_Description,
+                        id: details.Feed_Id,
+                        name: details.Feed_Name,
+                        type: details.FeedType_Name,
+                    };
+                } else {
+                    return null;
+                }
+            }
+        );
+    }
+
+    /**
+     * From a url, return the list of packages
+     *
+     * @param {string} url - The URL to connect to
+     * @param {string} pkg - The package to acquire
+     * @returns {Promise}
+     */
+    public getPackagesSingle(url: string, pkg: string): Promise<any> {
+        return this.sendRequest(url, pkg, "ProGetPackages_GetPackages").then(
+            (response: string) => {
+                try {
+                    return JSON.parse(response);
+                } catch (e) {
+                    this.logger.error("EPARSED", "Unable to parse Proget GetPackage response", response);
+                    return [];
+                }
+            },
+            () => {
+                return [];
+            }
+        );
+    }
+
+    /**
+     * Return the versions of a package from a source
+     *
+     * @param {string} pkg - Tha package to list the versions
+     * @returns {Promise}
+     */
+    public getPackageVersions(pkg: string): Promise<any> {
+        if (ProgetApi.isShortFormat(pkg)) {
+            // We will scan all the sources that match the regex.
+            return new Promise((resolve: Function, reject: Function) => {
+                let promises = [];
+                let out: ReleaseTags[] = [];
+
+                for (let i = 0, j = this.registries.length; i < j; ++i) {
+                    promises.push(this.sendRequest(this.registries[i], pkg, "ProGetPackages_GetPackageVersions")
+                        .then((response: string) => {
+                            out = out.concat(ProgetApi.extractReleases(response, this.registries[i]));
+                        })
+                    );
+                }
+
+                Promise.all(promises).then(
+                    () => {
+                        resolve(out);
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            });
+
+        } else {
+            // TODO, may have to extract the package name here
+            // After match the only choice here is an already formatted Proget Universal source
+            return this.sendRequest(pkg, null, "ProGetPackages_GetPackageVersions").then((response: string) => {
+                return ProgetApi.extractReleases(response, pkg);
+            });
+        }
+    }
+}
+
+export default ProgetApi;

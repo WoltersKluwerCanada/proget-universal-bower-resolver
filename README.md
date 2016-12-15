@@ -19,15 +19,11 @@ npm install proget-universal-bower-resolver
 Add/modify the `.bowerrc` file:
 ```javascript
 {
-    [...]
+    /* [...] */
     "proget": {
-        /* For simple ProGet server configuration  */
-        "server": "http(s)://<String>",
-        "apiKey": "<String>"
-        /* For multiple ProGet server configuration */
         "apiKeyMapping": [
             {
-                "server": "http(s)://<String>",
+                "server": "serverRegEx; ex: http(s)?:\\/\\/.*\\/upack\\/.*",
                 "key" : "<String>"
             }
             /* [...] */
