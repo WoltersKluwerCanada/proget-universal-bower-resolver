@@ -41,7 +41,8 @@
     "lintTest": "eslint test/",
     "lintAllFix": "tslint --project tsconfig.json --fix & eslint test/ --fix",
     "test": "npm run lint & npm run lintTest & npm run unit && npm run coverage",
-    "unit": "mocha -R spec test/*.test.js"
+    "unit": "mocha -R spec test/*.test.js",
+    "buildDeploy": "rimraf lib/* && tsc --sourceMap false"
   },
   "engines": {
     "node": ">=4"

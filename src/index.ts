@@ -28,6 +28,7 @@ const resolver = (bower: Bower) => {
         /**
          * Tells Bower whether to use or not use this resolver for some source.
          *
+         * @param {string} source - Source from bower.json
          * @returns {Promise} - Tells whether resolver can handle given source
          */
         match: (source: string): Promise<any> => {

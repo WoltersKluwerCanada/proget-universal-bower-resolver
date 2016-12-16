@@ -13,9 +13,9 @@ import createError from "./createError";
 /**
  * Format a list of tags to be consume by Bower
  *
- * @param {Array} tags - List of semver validated tags
+ * @param {string[]} tags - List of semver validated tags
  * @param {string} repository - The source from where theses tags were found
- * @return {Array.<{release: string, target: string, version: string}>}
+ * @return {ReleaseTags[]}
  */
 function releases(tags: string[], repository: string): ReleaseTags[] {
     if (!tags.length) {
@@ -31,10 +31,10 @@ function releases(tags: string[], repository: string): ReleaseTags[] {
 }
 
 /**
- * Validates that the references have semver format
+ * Validates that the references have valid semver format
  *
- * @param {Array} refs - List of tags
- * @return {Array}
+ * @param {string[]} refs - List of tags
+ * @return {string[]}
  */
 function tags(refs: string[]): string[] {
     return refs.filter((el) => {
@@ -46,7 +46,7 @@ function tags(refs: string[]): string[] {
  * Parse the server response in an array of consumable version strings
  *
  * @param {string} response - The server response
- * @return {Array}
+ * @return {string[]}
  */
 function extractRefs(response: string): string[] {
     let versions = [];
@@ -96,7 +96,7 @@ class ProgetApi {
      *
      * @param {string} response - The server response
      * @param {string} repository - The address from where the response was received
-     * @return {Array<ReleaseTags>}
+     * @return {ReleaseTags[]}
      */
     public static extractReleases(response: string, repository: string): ReleaseTags[] {
         return releases(tags(extractRefs(response)), repository);
@@ -165,6 +165,39 @@ class ProgetApi {
                     }
                 }
             }
+        }
+
+        // Validate the parameters in the configuration file
+        this.checkForOldConfig(bower.config);
+    }
+
+    /**
+     * Throw warnings if old configuration parameters still in the .bowerrc file
+     *
+     * @param {BowerConfig} conf - The Bower configuration
+     */
+    public checkForOldConfig(conf: BowerConfig) {
+        let warn = (parameter) => {
+            this.logger.warn(
+                "pubr - conf",
+                `The parameter "${parameter}" is no more require, you can delete it from your your .bowerrc file.`
+            );
+        };
+
+        if (conf.proget.hasOwnProperty("server")) {
+            warn("proget.server");
+        }
+
+        if (conf.proget.hasOwnProperty("apiKey")) {
+            warn("proget.apiKey");
+        }
+
+        if (conf.proget.hasOwnProperty("feed")) {
+            warn("proget.feed");
+        }
+
+        if (conf.proget.hasOwnProperty("group")) {
+            warn("proget.group");
         }
     }
 
@@ -309,29 +342,6 @@ class ProgetApi {
                 } else {
                     return null;
                 }
-            }
-        );
-    }
-
-    /**
-     * From a url, return the list of packages
-     *
-     * @param {string} url - The URL to connect to
-     * @param {string} pkg - The package to acquire
-     * @returns {Promise}
-     */
-    public getPackagesSingle(url: string, pkg: string): Promise<any> {
-        return this.sendRequest(url, pkg, "ProGetPackages_GetPackages").then(
-            (response: string) => {
-                try {
-                    return JSON.parse(response);
-                } catch (e) {
-                    this.logger.error("EPARSED", "Unable to parse Proget GetPackage response", response);
-                    return [];
-                }
-            },
-            () => {
-                return [];
             }
         );
     }

@@ -20,10 +20,16 @@ Add/modify the `.bowerrc` file:
 ```javascript
 {
     /* [...] */
+    "registry": {
+      "search": [
+        "<add your upack feed here>",
+        /* [...] */
+      ]
+    },
     "proget": {
         "apiKeyMapping": [
             {
-                "server": "serverRegEx; ex: http(s)?:\\/\\/.*\\/upack\\/.*",
+                "server": "server <RegEx>; ex: http(s)?:\\/\\/.*\\/upack\\/.*",
                 "key" : "<String>"
             }
             /* [...] */
@@ -37,12 +43,10 @@ Add/modify the `.bowerrc` file:
 
 Where:
 
-| Key                         | Description                                                         | Require                                              |
-|-----------------------------|---------------------------------------------------------------------|------------------------------------------------------|
-| proget.server               | Is the address to the ProGet server.                                | NO only if `proget.apiKeyMapping` is set             |
-| proget.apiKey               | Is the API_Key use to communicate with the API.                     | NO only if `proget.apiKeyMapping` is set             |
-| proget.apiKeyMapping.server | Is the address to a ProGet server.                                  | At least one object if `proget.apiKeyMapping` is set |
-| proget.apiKeyMapping.Key    | Is the API_Key use to communicate with the API of the above server. | At least one object if `proget.apiKeyMapping` is set |
+| Key                         | Description                                                         | Require  |
+|-----------------------------|---------------------------------------------------------------------|----------|
+| proget.apiKeyMapping.server | A regex use to filter your ProGet Universal feeds by server.        | Yes      |
+| proget.apiKeyMapping.Key    | Is the API_Key use to communicate with the API of the above server. | Yes      |
 
 
 And the way to create your dependencies is like you normally will do:
