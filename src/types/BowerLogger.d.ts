@@ -1,4 +1,4 @@
-declare class BowerLogger {
+declare interface BowerLogger {
     error: Function;
     conflict: Function;
     warn: Function;

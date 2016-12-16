@@ -10,7 +10,6 @@ import createError from "./createError";
 
 import * as fs from "fs";
 import * as path from "path";
-import ErrorN from "./ErrorN";
 
 /**
  * Extract the ZIP archive

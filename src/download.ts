@@ -13,7 +13,7 @@ import ErrorN from "./ErrorN";
 import * as fs from "fs";
 import * as url from "url";
 
-const retry = require("retry");
+import * as retry from "retry";
 
 const errorCodes = [
     "EADDRINFO",

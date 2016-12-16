@@ -1,4 +1,4 @@
-declare class BowerConfig {
+declare interface BowerConfig {
     httpsProxy: string;
     proxy: string;
     ca: string;
@@ -10,6 +10,6 @@ declare class BowerConfig {
     registry: BowerConfigRegistry;
 }
 
-declare class BowerConfigRegistry {
+declare interface BowerConfigRegistry {
     search: Array<string>;
 }

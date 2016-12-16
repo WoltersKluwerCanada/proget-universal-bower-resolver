@@ -1,8 +1,8 @@
-declare class ProGetConf {
+declare interface ProGetConf {
     apiKeyMapping: Array<ProGetApiConf>;
 }
 
-declare class ProGetApiConf {
+declare interface ProGetApiConf {
     server: RegExp;
     key: string;
 }

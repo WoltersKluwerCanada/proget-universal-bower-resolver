@@ -112,6 +112,7 @@ class ProgetApi {
     private logger: BowerLogger;
     private conf: ProGetApiConf[];
     private registries: string[] = [];
+    private cache: ProGetCache = {};
 
     /**
      * Prepare for communicating with ProGet
@@ -189,12 +190,11 @@ class ProgetApi {
      *
      * @param {string} url - The URL to connect to
      * @param {string} adr - The address to access
-     * @param {function} resolve - Promise success function
-     * @param {function} reject - Promise fail function
-     * @param {{}} params - Parameters use in the query
+     * @param {Function} resolve - Promise success function
+     * @param {Function} reject - Promise fail function
+     * @param {RequestParameters} params - Parameters use in the query
      */
-    public communicate(url: string, adr: string, resolve: Function, reject: Function, params: Object) {
-        // TODO fix type above for params
+    public communicate(url: string, adr: string, resolve: Function, reject: Function, params: RequestParameters) {
         let _request = request.defaults({
             ca: this.ca,
             proxy: Url.parse(url).protocol === "https:" ? this.httpProxy : this.proxy,
@@ -224,13 +224,12 @@ class ProgetApi {
      * Communicate with ProGet to get a feed ID from a name
      *
      * @param {string} url - The URL to connect to
-     * @param {function} resolve - The success function
-     * @param {function} reject - The reject function
-     * @param {{}} params - Parameters use in the query
+     * @param {Function} resolve - The success function
+     * @param {Function} reject - The reject function
+     * @param {RequestParameters} params - Parameters use in the query
      */
-    public findFeedId(url: string, resolve: Function, reject: Function, params) {
-        // TODO fix type above for params
-        let reqID = url.split("/upack/")[0] + "/api/json/Feeds_GetFeed";
+    public findFeedId(url: string, resolve: Function, reject: Function, params: RequestParameters) {
+        let reqID = `${url.split("/upack/")[0]}/api/json/Feeds_GetFeed`;
 
         this.communicate(url, reqID, resolve, reject, {Feed_Name: params.Feed_Id, API_Key: params.API_Key});
     }
@@ -367,7 +366,6 @@ class ProgetApi {
                     }
                 );
             });
-
         } else {
             // TODO, may have to extract the package name here
             // After match the only choice here is an already formatted Proget Universal source
@@ -375,6 +373,53 @@ class ProgetApi {
                 return ProgetApi.extractReleases(response, pkg);
             });
         }
+    }
+
+    /**
+     * Read the cache and return the available version(s) for the package
+     *
+     * @param {string} pkg - The package
+     * @returns {ReleaseTags[]}
+     */
+    public readCache(pkg: string): ReleaseTags[] {
+        return this.cache[pkg];
+    }
+
+    /**
+     * Validate that the package can be treat by the resolver
+     *
+     * @param {string} pkg - The package to found
+     * @returns {Promise}
+     */
+    public isMatching(pkg: string): Promise<any> {
+        return new Promise((resolve: Function, reject: Function) => {
+            if (this.isSupportedSource(pkg) || ProgetApi.isShortFormat(pkg)) {
+                this.getPackageVersions(pkg).then(
+                    (data: ReleaseTags[]) => {
+                        if (data.length > 0) {
+                            this.cache[pkg] = data;
+
+                            this.logger.debug(
+                                "pubr - match", `The resolver pubr found ${data.length} versions of the package ${pkg}.`
+                            );
+
+                            resolve(true);
+                        } else {
+                            this.logger.debug(
+                                "pubr - match", `The resolver pubr don't found the package ${pkg}.`
+                            );
+
+                            resolve(false);
+                        }
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            } else {
+                resolve(false);
+            }
+        });
     }
 }
 

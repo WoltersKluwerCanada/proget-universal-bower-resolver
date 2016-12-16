@@ -1,4 +1,4 @@
-declare class ReleaseTags {
+declare interface ReleaseTags {
     target: string;
     version: string;
 }

@@ -5,6 +5,8 @@
  * @module index
  */
 
+/* tslint:disable:object-literal-sort-keys */
+
 // Prepare the temp module
 import * as tmp from "tmp";
 tmp.setGracefulCleanup();
@@ -17,7 +19,7 @@ import ProgetAPI from "./progetApi";
  * Main module section
  *
  * @param {Bower} bower
- * @return {*}
+ * @return {{match: Function, releases: Function, fetch: Function}}
  */
 const resolver = (bower: Bower) => {
     let api = new ProgetAPI(bower);
@@ -26,20 +28,20 @@ const resolver = (bower: Bower) => {
         /**
          * Tells Bower whether to use or not use this resolver for some source.
          *
-         * @returns {boolean} - Tells whether resolver can handle given source
+         * @returns {Promise} - Tells whether resolver can handle given source
          */
-        match: (source: string): boolean => {
-            return api.isSupportedSource(source) || ProgetAPI.isShortFormat(source);
+        match: (source: string): Promise<any> => {
+            return api.isMatching(source);
         },
 
         /**
          * Bower selects one matching version from the result and passes matching target field to fetch method.
          *
          * @param {string} source - Source from bower.json
-         * @returns {Promise}
+         * @returns {ReleaseTags[]}
          */
-        releases: (source: string): Promise<any> => {
-            return api.getPackageVersions(source);
+        releases: (source: string): ReleaseTags[] => {
+            return api.readCache(source);
         },
 
         /**
