@@ -45,7 +45,7 @@
     "lintTest": "eslint test/",
     "lintAllFix": "tslint --project tsconfig.json --fix & eslint test/ --fix",
     "prepublish": "npm run buildDeploy",
-    "test": "npm run buildDeploy && npm run lint & npm run lintTest & npm run unit && npm run coverage",
+    "test": "npm run buildDeploy && npm run lint && npm run lintTest && npm run unit && npm run coverage",
     "unit": "mocha -R spec test/*.test.js"
   },
   "engines": {
