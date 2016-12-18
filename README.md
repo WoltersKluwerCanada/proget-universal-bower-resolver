@@ -45,7 +45,7 @@ Where:
 
 | Key                         | Description                                                         | Require  |
 |-----------------------------|---------------------------------------------------------------------|----------|
-| proget.apiKeyMapping.server | A regex use to filter your ProGet Universal feeds by server.        | Yes      |
+| proget.apiKeyMapping.server | A regex use to filter your ProGet Universal feeds by the server.    | Yes      |
 | proget.apiKeyMapping.Key    | Is the API_Key use to communicate with the API of the above server. | Yes      |
 
 
@@ -60,7 +60,7 @@ And the way to create your dependencies is like you normally will do:
 }
 ```
 
-Or, you can directly specify the URL of the file to download (formatted like the link under the download button of the ProGet package web page)
+Or you can directly specify the URL of the file to download (formatted like the link under the download button of the ProGet package web page)
 
 ex:
 ```text
