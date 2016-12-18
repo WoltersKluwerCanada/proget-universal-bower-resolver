@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const share = require("./data/share");
 
-const extract = require("../lib/extract");
+const extract = require("../lib/extract").default;
 
 // Test the Extract module methods
 describe("extract", function() {

@@ -3,7 +3,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 const share = require("./data/share");
-const server = require("./data/fakeHtttpServer");
+const server = require("./data/fake/fakeHtttpServer");
 const progetAPI = require("../lib/progetApi").default;
 
 // Test the Request module methods

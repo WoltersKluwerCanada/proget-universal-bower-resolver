@@ -5,9 +5,9 @@ const expect = chai.expect;
 const fs = require("fs");
 const path = require("path");
 const share = require("./data/share");
-const server = require("./data/fakeHtttpServer");
+const server = require("./data/fake/fakeHtttpServer");
 
-const download = require("../lib/download");
+const download = require("../lib/download").default;
 
 // Test the Download module methods
 describe("download", function() {
@@ -25,6 +25,7 @@ describe("download", function() {
 
     // Download a file from the fake server
     it("a file", function(done) {
+        console.log(`${share.testAddress}/upack/feedName/download/bower/packageName/version`);
         download(`${share.testAddress}/upack/feedName/download/bower/packageName/version`, testFolder, share.bowerConfig).then(
             () => {
                 fs.readdir(testFolder, (err, files) => {

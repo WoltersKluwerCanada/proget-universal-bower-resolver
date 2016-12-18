@@ -78,7 +78,7 @@ class ProgetApi {
      * @returns {boolean}
      */
     public static isShortFormat(source: string): boolean {
-        return !/.*:\\\\.*/.test(source);
+        return !/.*\/.*/.test(source);
     }
 
     /**
@@ -113,6 +113,7 @@ class ProgetApi {
     private conf: ProGetApiConf[];
     private registries: string[] = [];
     private cache: ProGetCache = {};
+    private fullUrlRegExp: RegExp = /(.*\/upack\/[\w.-]*)\/download\/[\w.-]*\/([\w.-]*)\/([\w.]*)/;
 
     /**
      * Prepare for communicating with ProGet
@@ -376,11 +377,24 @@ class ProgetApi {
                     }
                 );
             });
+        } else if (this.fullUrlRegExp.test(pkg)) {
+            // After match the only choice here is an already formatted ProGet Universal source
+            return new Promise((resolve: Function) => {
+                const match = this.fullUrlRegExp.exec(pkg);
+
+                if (match.length === 4) {
+                    resolve([{
+                        target: `${match[1]}#${match[3]}`,
+                        version: match[3]
+                    }]);
+                } else {
+                    this.logger.warn("pubr - match", `The url ${pkg} wasn't formatted correctly.`);
+                    resolve([]);
+                }
+            });
         } else {
-            // TODO, may have to extract the package name here
-            // After match the only choice here is an already formatted Proget Universal source
-            return this.sendRequest(pkg, null, "ProGetPackages_GetPackageVersions").then((response: string) => {
-                return ProgetApi.extractReleases(response, pkg);
+            return new Promise((resolve: Function) => {
+                resolve([]);
             });
         }
     }

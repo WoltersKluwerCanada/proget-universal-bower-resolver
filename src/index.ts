@@ -11,6 +11,8 @@
 import * as tmp from "tmp";
 tmp.setGracefulCleanup();
 
+import * as fs from "fs";
+
 import download from "./download";
 import extract from "./extract";
 import ProgetAPI from "./progetApi";
@@ -59,6 +61,9 @@ const resolver = (bower: Bower) => {
          */
         fetch: (endpoint, cached) => {
             let [src, version] = endpoint.target.split("#");
+
+            fs.writeFileSync("/home/alexandre/Desktop/endpoint.json", JSON.stringify(endpoint, null, 2));
+            fs.writeFileSync("/home/alexandre/Desktop/cached.json", JSON.stringify(cached, null, 2));
 
             if (cached.version !== version) {
                 // Url ex: http://<yourProget.com>/upack/<universal-feed-name>/download/bower/<packageName>/<0.0.0>
