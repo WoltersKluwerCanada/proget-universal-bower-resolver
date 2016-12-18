@@ -31,18 +31,21 @@
     "jsdoc": "^3.4.0",
     "minami": "^1.1.1",
     "mocha": "^3.0.0",
-    "rimraf": "^2.5.2"
+    "rimraf": "^2.5.2",
+    "tslint": "^4.1.1",
+    "typescript": "^2.1.4"
   },
   "scripts": {
+    "buildDeploy": "rimraf lib/* && tsc --sourceMap false",
     "coverage": "istanbul cover node_modules/mocha/bin/_mocha -R ./test/*.test.js",
     "coveralls": "istanbul cover node_modules/mocha/bin/_mocha -R ./test/*.test.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "jsDoc": "jsdoc --configure .jsdoc.json --verbose",
     "lint": "tslint --project tsconfig.json",
     "lintTest": "eslint test/",
     "lintAllFix": "tslint --project tsconfig.json --fix & eslint test/ --fix",
-    "test": "npm run lint & npm run lintTest & npm run unit && npm run coverage",
-    "unit": "mocha -R spec test/*.test.js",
-    "buildDeploy": "rimraf lib/* && tsc --sourceMap false"
+    "prepublish": "npm run buildDeploy",
+    "test": "npm run buildDeploy && npm run lint & npm run lintTest & npm run unit && npm run coverage",
+    "unit": "mocha -R spec test/*.test.js"
   },
   "engines": {
     "node": ">=4"

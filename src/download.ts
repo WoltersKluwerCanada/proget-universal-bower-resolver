@@ -1,19 +1,15 @@
 "use strict";
-
 /**
  * Download module.
  * @module download
  */
-
+import * as fs from "fs";
 import * as request from "request";
+import * as retry from "retry";
 import * as tmp from "tmp";
+import * as url from "url";
 import createError from "./createError";
 import ErrorN from "./ErrorN";
-
-import * as fs from "fs";
-import * as url from "url";
-
-import * as retry from "retry";
 
 const errorCodes = [
     "EADDRINFO",

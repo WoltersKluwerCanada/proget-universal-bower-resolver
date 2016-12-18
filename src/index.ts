@@ -1,21 +1,16 @@
 "use strict";
-
 /**
  * Main module.
  * @module index
  */
-
 /* tslint:disable:object-literal-sort-keys */
-
-// Prepare the temp module
 import * as tmp from "tmp";
-tmp.setGracefulCleanup();
-
-import * as fs from "fs";
-
 import download from "./download";
 import extract from "./extract";
 import ProgetAPI from "./progetApi";
+
+// Prepare the temp module
+tmp.setGracefulCleanup();
 
 /**
  * Main module section
@@ -62,12 +57,16 @@ const resolver = (bower: Bower) => {
         fetch: (endpoint, cached) => {
             let [src, version] = endpoint.target.split("#");
 
-            fs.writeFileSync("/home/alexandre/Desktop/endpoint.json", JSON.stringify(endpoint, null, 2));
-            fs.writeFileSync("/home/alexandre/Desktop/cached.json", JSON.stringify(cached, null, 2));
-
             if (cached.version !== version) {
                 // Url ex: http://<yourProget.com>/upack/<universal-feed-name>/download/bower/<packageName>/<0.0.0>
-                let downloadUrl = `${src}/download/bower/${endpoint.source}/${version}`;
+                let downloadUrl: string;
+
+                if (api.fullUrlRegExp.test(endpoint.source)) {
+                    downloadUrl = endpoint.source;
+                } else {
+                    downloadUrl = `${src}/download/bower/${endpoint.source}/${version}`;
+                }
+
                 let downloadPath = tmp.dirSync({unsafeCleanup: true});
 
                 return download(downloadUrl, downloadPath.name, bower.config).then((archivePatch) => {

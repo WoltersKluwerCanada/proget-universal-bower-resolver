@@ -8,9 +8,12 @@ const server = require("./data/fake/fakeHtttpServer");
 const index = require("../lib/index")({
     config: share.bowerConfig,
     logger: {
-        warn:(id, msg) => {console.log(`warn: ${id}: ${msg}`)},
-        log:(id, msg) => {console.log(`log: ${id}: ${msg}`)},
-        debug: (id, msg) => {console.log(`debug: ${id}: ${msg}`)}
+        warn: () => {
+        },
+        log: () => {
+        },
+        debug: () => {
+        }
     }
 });
 
@@ -88,22 +91,18 @@ describe("index", function() {
 
     // Test the releases method
     it("releases", function(done) {
-        index.releases(`${share.testAddress}?feedName/bower/packageName`).then(
+        index.match("packageName").then(
             (res) => {
-                try {
-                    expect(res).eql([
-                        {
-                            "target": "1.1.1",
-                            "version": "1.1.1"
-                        },
-                        {
-                            "target": "2.2.2",
-                            "version": "2.2.2"
-                        }
-                    ]);
-                    done();
-                } catch (e) {
-                    done(e);
+                if (res === true) {
+                    try {
+                        expect(index.releases("packageName")).to.have.lengthOf(4);
+
+                        done();
+                    } catch (e) {
+                        done(e);
+                    }
+                } else {
+                    done("This url is suppose to be supported");
                 }
             },
             (err) => {
@@ -116,8 +115,8 @@ describe("index", function() {
     describe("fetch", function() {
         let endpoint = {
             name: "packageName",
-            target: `${share.testAddress}#1.1.1`,
-            source: `${share.testAddress}/feedName/bower/packageName`,
+            target: `${share.testAddress}/upack/feedName#1.1.1`,
+            source: "packageName",
             registry: true
         };
 
@@ -145,16 +144,22 @@ describe("index", function() {
         // Try like if bower already have the package in cache
         it("with version in cache", function() {
             let cached = {
-                endpoint: endpoint,
-                release: "1.1.1",
-                version: "1.1.1",
-                resolution: {}
+                "releases": [
+                    {
+                        "target": `${share.testAddress}/upack/feedName#1.0.0`,
+                        "version": "1.0.0"
+                    },
+                    {
+                        "target": `${share.testAddress}/upack/feedName#2.0.0`,
+                        "version": "2.0.0"
+                    }
+                ]
             };
 
             let res = index.fetch(endpoint, cached);
 
             // If the method is ignore, it return undefined
-            expect(res).be.a("undefined");
+            expect(res).eql({});
         });
     });
 

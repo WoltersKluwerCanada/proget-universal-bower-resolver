@@ -1,15 +1,12 @@
 "use strict";
-
 /**
  * Extract module.
  * @module extract
  */
-
 import * as AdmZip from "adm-zip";
-import createError from "./createError";
-
 import * as fs from "fs";
 import * as path from "path";
+import createError from "./createError";
 
 /**
  * Extract the ZIP archive

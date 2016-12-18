@@ -14,7 +14,7 @@ describe("download", function() {
     let testFolder = path.join(__dirname, "data", "download");
 
     before(function(done) {
-        share.createTestFolder(testFolder, (err)=> {
+        share.createTestFolder(testFolder, (err) => {
             if (err) {
                 done(err);
             } else {
@@ -25,7 +25,6 @@ describe("download", function() {
 
     // Download a file from the fake server
     it("a file", function(done) {
-        console.log(`${share.testAddress}/upack/feedName/download/bower/packageName/version`);
         download(`${share.testAddress}/upack/feedName/download/bower/packageName/version`, testFolder, share.bowerConfig).then(
             () => {
                 fs.readdir(testFolder, (err, files) => {

@@ -60,6 +60,19 @@ And the way to create your dependencies is like you normally will do:
 }
 ```
 
+Or, you can directly specify the URL of the file to download (formatted like the link under the download button of the ProGet package web page)
+
+ex:
+```text
+{
+    [...],
+    "dependencies": {
+        "somePackage": "https://your.proget.server/upack/yourFeed/download/bower/yourPackage/package.version.wanted",
+        [...]
+    }
+}
+```
+
 ### Rename packages
 
 If you want to rename your packages write the dependence as normal:

@@ -7,7 +7,7 @@ const server = require("./data/fake/fakeHtttpServer");
 const progetAPI = require("../lib/progetApi").default;
 
 // Test the Request module methods
-describe("proget.api.test", function() {
+describe("progetApi", function() {
     // let lastWarning;
 
     before(function(done) {
@@ -23,82 +23,112 @@ describe("proget.api.test", function() {
         });
     });
 
-    // beforeEach(function() {
-    //     lastWarning = "";
-    // });
-    //
-    // describe("validate source", function() {
-    //     it("good", function() {
-    //         expect()
-    //     });
-    //
-    //     it("warning", function() {
-    //
-    //     });
-    //
-    //     it("bad", function() {
-    //
-    //     });
-    // });
+    // Test the isShortFormat method
+    describe("isShortFormat", function() {
+        it("shortName", function() {
+            expect(progetAPI.isShortFormat("package")).to.be.true;
+        });
+
+        it("empty", function() {
+            expect(progetAPI.isShortFormat("")).to.be.false;
+        });
+
+        it("long tool supported name", function() {
+            expect(progetAPI.isShortFormat(`${share.testAddress}/upack/feedName`)).to.be.false;
+        });
+
+        it("long tool not supported name", function() {
+            expect(progetAPI.isShortFormat("http://some.random.vwesite.fake/")).to.be.false;
+        });
+    });
+
+    // Test the validateRegexScope method
+    describe("validateRegexScope", function() {
+        it("valid", function() {
+            expect(progetAPI.validateRegexScope(`${share.testAddress}/upack/feedName`)).to.be.true;
+        });
+
+        it("not valid", function() {
+            expect(progetAPI.validateRegexScope("https://bower.herokuapp.com")).to.be.false;
+        });
+    });
 
     // Test the extractReleases method
     it("extractReleases", function() {
-        let out = progetAPI.extractReleases(share.expectedRequestAnswer.forPkgInfo1);
+        let out = progetAPI.extractReleases(share.expectedRequestAnswer.forPkgInfo1, `${share.testAddress}/upack/feedName`);
 
         expect(out).eql([
             {
-                "release": "1.1.1",
-                "target": "1.1.1",
+                "target": `${share.testAddress}/upack/feedName#1.1.1`,
                 "version": "1.1.1"
             },
             {
-                "release": "2.2.2",
-                "target": "2.2.2",
+                "target": `${share.testAddress}/upack/feedName#2.2.2`,
                 "version": "2.2.2"
             }
         ]);
     });
 
-    describe("ProGetPackages_GetPackages", function() {
-        it("with feed id 1", function(done) {
-            this.api.getPackagesSingle(`${share.testAddress}?23/bower/packageName`).then(
-                (rep) => {
-                    expect(rep.length).equal(2);
-                    expect("1.1.1").equal(rep[0].Version_Text);
-                    expect("2.2.2").equal(rep[1].Version_Text);
-                    done();
-                },
-                (err) => {
-                    done(err);
-                }
-            );
+    //checkForOldConfig
+    // TODO this test
+
+    // Test the isSupportedSource method
+    describe("isSupportedSource", function() {
+        it("supported", function() {
+            expect(this.api.isSupportedSource(`${share.testAddress}/upack/feedName`)).to.be.true;
         });
 
-        it("with feed name", function(done) {
-            this.api.getPackagesSingle(`${share.testAddress}?wk-develop-bower/bower/packageName`).then(
-                (rep) => {
-                    expect(rep.length).equal(2);
-                    expect("1.1.1").equal(rep[0].Version_Text);
-                    expect("3.3.3").equal(rep[1].Version_Text);
-                    done();
-                },
-                (err) => {
-                    done(err);
-                }
-            );
+        it("unsupported", function() {
+            expect(this.api.isSupportedSource("https://bower.herokuapp.com")).to.be.false;
         });
     });
 
+    //communicate
+    // TODO this test
+
+    it("findFeedId", function(done) {
+        this.api.findFeedId(
+            "http://localhost:8080/upack/feedName",
+            () => {
+                done();
+            },
+            (err) => {
+                done(err);
+            },
+            {
+                Feed_Name: "feedName",
+                API_Key: share.testApiKey
+            }
+        );
+    });
 
     // Test request use at step releases
-    describe("ProGetPackages_GetPackageVersions", function() {
-        it("with feed id 1", function(done) {
-            this.api.getPackageVersions(`${share.testAddress}?23/bower/packageName`).then(
+    describe("getPackageVersions", function() {
+        it("package short name", function(done) {
+            this.api.getPackageVersions("packageName").then(
                 (rep) => {
-                    expect(rep.length).equal(2);
-                    expect("1.1.1").equal(rep[0].release).equal(rep[0].target).equal(rep[0].version);
-                    expect("2.2.2").equal(rep[1].release).equal(rep[1].target).equal(rep[1].version);
-                    done();
+                    try {
+                        expect(rep.length).equal(4);
+                        expect(rep).to.contain({
+                            target: "http://localhost:8080/upack/42#1.1.1",
+                            version: "1.1.1"
+                        });
+                        expect(rep).to.contain({
+                            target: "http://localhost:8080/upack/42#3.3.3",
+                            version: "3.3.3"
+                        });
+                        expect(rep).to.contain({
+                            target: "http://localhost:8080/upack/23#1.1.1",
+                            version: "1.1.1"
+                        });
+                        expect(rep).to.contain({
+                            target: "http://localhost:8080/upack/23#2.2.2",
+                            version: "2.2.2"
+                        });
+                        done();
+                    } catch (e) {
+                        done(e);
+                    }
                 },
                 (err) => {
                     done(err);
@@ -106,13 +136,19 @@ describe("proget.api.test", function() {
             );
         });
 
-        it("with feed id 2", function(done) {
-            this.api.getPackageVersions(`${share.testAddress}?42/bower/packageName`).then(
+        it("url as package", function(done) {
+            this.api.getPackageVersions(`${share.testAddress}/upack/42/download/bower/packageName/1.1.1`).then(
                 (rep) => {
-                    expect(rep.length).equal(2);
-                    expect("1.1.1").equal(rep[0].release).equal(rep[0].target).equal(rep[0].version);
-                    expect("3.3.3").equal(rep[1].release).equal(rep[1].target).equal(rep[1].version);
-                    done();
+                    try {
+                        expect(rep.length).equal(1);
+                        expect(rep).to.contain({
+                            target: "http://localhost:8080/upack/42#1.1.1",
+                            version: "1.1.1"
+                        });
+                        done();
+                    } catch (e) {
+                        done(e);
+                    }
                 },
                 (err) => {
                     done(err);
@@ -120,47 +156,37 @@ describe("proget.api.test", function() {
             );
         });
 
-        it("with feed name", function(done) {
-            this.api.getPackageVersions(`${share.testAddress}?wk-develop-bower/bower/packageName`).then(
+        it("wrong formatted url", function(done) {
+            this.api.getPackageVersions("https://bower.herokuapp.com").then(
                 (rep) => {
-                    expect(rep.length).equal(2);
-                    expect("1.1.1").equal(rep[0].release).equal(rep[0].target).equal(rep[0].version);
-                    expect("3.3.3").equal(rep[1].release).equal(rep[1].target).equal(rep[1].version);
-                    done();
+                    try {
+                        expect(rep.length).equal(0);
+                        done();
+                    } catch (e) {
+                        done(e);
+                    }
                 },
                 (err) => {
                     done(err);
                 }
             );
         });
-        /*
-         it("all versions", function(done) {
-         this.api.getPackagesAllVersion("packageName").then(
-         function(rep) {
-         expect(rep.length).equal(3);
-         expect("1.1.1").equal(rep[0].release).equal(rep[0].target).equal(rep[0].version);
-         expect("2.2.2").equal(rep[1].release).equal(rep[1].target).equal(rep[1].version);
-         expect("3.3.3").equal(rep[2].release).equal(rep[2].target).equal(rep[2].version);
-         done();
-         },
-         function(err) {
-         done(err);
-         }
-         );
-         });
-         */
     });
 
     // Test request use at step fetch
     it("Feeds_GetFeed by number", function(done) {
-        this.api.getFeedDetails(`${share.testAddress}?23`).then(
+        this.api.getFeedDetails(`${share.testAddress}/upack/23`).then(
             (rep) => {
-                let serverData = JSON.parse(share.expectedRequestAnswer.forFeedInfo1);
-                expect(rep.description).equal(serverData.Feed_Description);
-                expect(rep.name).equal(serverData.Feed_Name);
-                expect(rep.id).equal(serverData.Feed_Id);
-                expect(rep.type).equal(serverData.FeedType_Name);
-                done();
+                try {
+                    let serverData = JSON.parse(share.expectedRequestAnswer.forFeedInfo1);
+                    expect(rep.description).equal(serverData.Feed_Description);
+                    expect(rep.name).equal(serverData.Feed_Name);
+                    expect(rep.id).equal(serverData.Feed_Id);
+                    expect(rep.type).equal(serverData.FeedType_Name);
+                    done();
+                } catch (e) {
+                    done(e);
+                }
             },
             (err) => {
                 done(err);
@@ -170,15 +196,19 @@ describe("proget.api.test", function() {
 
     // Test request use at step fetch
     it("Feeds_GetFeed by name", function(done) {
-        this.api.getFeedDetails(`${share.testAddress}?wk-develop-bower`).then(
+        this.api.getFeedDetails(`${share.testAddress}/upack/wk-develop-bower`).then(
             (rep) => {
                 let serverData = JSON.parse(share.expectedRequestAnswer.forFeedInfo2);
 
-                expect(rep.description).equal(serverData.Feed_Description);
-                expect(rep.name).equal(serverData.Feed_Name);
-                expect(rep.id).equal(serverData.Feed_Id);
-                expect(rep.type).equal(serverData.FeedType_Name);
-                done();
+                try {
+                    expect(rep.description).equal(serverData.Feed_Description);
+                    expect(rep.name).equal(serverData.Feed_Name);
+                    expect(rep.id).equal(serverData.Feed_Id);
+                    expect(rep.type).equal(serverData.FeedType_Name);
+                    done();
+                } catch (e) {
+                    done(e);
+                }
             },
             (err) => {
                 done(err);

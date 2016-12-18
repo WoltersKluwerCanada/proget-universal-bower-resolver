@@ -1,10 +1,8 @@
 "use strict";
-
 /**
  * CreateError module.
  * @module createError
  */
-
 import ErrorN from "./ErrorN";
 
 /**

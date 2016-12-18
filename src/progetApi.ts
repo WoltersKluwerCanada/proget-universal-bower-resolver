@@ -1,13 +1,11 @@
 "use strict";
-
 /**
  * Proget communication module.
  * @module progetApi
  */
-
 import * as request from "request";
 import * as semver from "semver";
-import * as Url  from "url";
+import * as Url from "url";
 import createError from "./createError";
 
 /**
@@ -78,7 +76,7 @@ class ProgetApi {
      * @returns {boolean}
      */
     public static isShortFormat(source: string): boolean {
-        return !/.*\/.*/.test(source);
+        return (/.*\/.*/.test(source) === false) && (source.length > 0);
     }
 
     /**
@@ -102,6 +100,7 @@ class ProgetApi {
         return releases(tags(extractRefs(response)), repository);
     }
 
+    public fullUrlRegExp: RegExp = /(.*\/upack\/[\w.-]*)\/download\/[\w.-]*\/([\w.-]*)\/([\w.]*)/;
     private httpProxy: string;
     private proxy: string;
     private ca: Buffer;
@@ -113,7 +112,6 @@ class ProgetApi {
     private conf: ProGetApiConf[];
     private registries: string[] = [];
     private cache: ProGetCache = {};
-    private fullUrlRegExp: RegExp = /(.*\/upack\/[\w.-]*)\/download\/[\w.-]*\/([\w.-]*)\/([\w.]*)/;
 
     /**
      * Prepare for communicating with ProGet
