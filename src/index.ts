@@ -55,7 +55,11 @@ const resolver = (bower: Bower) => {
          * @returns {Promise}
          */
         fetch: (endpoint, cached) => {
-            let [src, version] = endpoint.target.split("#");
+            // TODO Bring back this line once Node 6 is the oldest supported Node version
+            // let [src, version] = endpoint.target.split("#");
+            let part = endpoint.target.split("#");
+            let src = part[0];
+            let version = part[1];
 
             if (cached.version !== version) {
                 // Url ex: http://<yourProget.com>/upack/<universal-feed-name>/download/bower/<packageName>/<0.0.0>
