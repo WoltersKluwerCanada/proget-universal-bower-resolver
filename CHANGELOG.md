@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.3.0 - 2016-12-xx
+## v0.3.0 - 2016-12-19
 
 - Add: Now some warning will be displayed if you still have some "old proget-universal-bower-resolver configuration" parameters in your `.bowerrc` config file.
 - Change: The tool change the format of the `.bowerrc` `proget` part is use. We now use the standard `registry.search` section instead of a custom one.
