@@ -7,3 +7,5 @@
 /test/data/download/
 /coverage/
 *.tgz
+/lib/
+/typings/

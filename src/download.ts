@@ -1,18 +1,15 @@
 "use strict";
-
 /**
  * Download module.
  * @module download
  */
-
-const Promise = require("bluebird");
-const createError = require("./createError");
-const request = require("request");
-const retry = require("retry");
-const tmp = require("tmp");
-
-const fs = require("fs");
-const url = require("url");
+import * as fs from "fs";
+import * as request from "request";
+import * as retry from "retry";
+import * as tmp from "tmp";
+import * as url from "url";
+import createError from "./createError";
+import ErrorN from "./ErrorN";
 
 const errorCodes = [
     "EADDRINFO",
@@ -26,27 +23,27 @@ const errorCodes = [
  *
  * @param {string} requestUrl - The url to download the package from
  * @param {string} downloadPath - The path to download the file in
- * @param {bowerConf} config - The Bower configuration
+ * @param {BowerConfig} config - The Bower configuration
  * @returns {Promise}
  */
-function download(requestUrl, downloadPath, config) {
-    let parsedUrl = url.parse(requestUrl),
-        file = tmp.tmpNameSync({dir: downloadPath, postfix: ".upack"});
+const download = (requestUrl: string, downloadPath: string, config: BowerConfig): Promise<any> => {
+    let parsedUrl = url.parse(requestUrl);
+    let file = tmp.tmpNameSync({dir: downloadPath, postfix: ".upack"});
 
     return new Promise((resolve, reject) => {
         // Prepare the retry module
         let retryOptions = Object.assign({
-            retries: 5,
             factor: 2,
-            minTimeout: 1000,
             maxTimeout: 35000,
-            randomize: true
+            minTimeout: 1000,
+            randomize: true,
+            retries: 5
         }, config.retry || {});
 
         // Prepare the request
         let _request = request.defaults({
-            proxy: parsedUrl.protocol === "https:" ? config.httpsProxy : config.proxy,
             ca: config.ca.search[0],
+            proxy: parsedUrl.protocol === "https:" ? config.httpsProxy : config.proxy,
             strictSSL: config.strictSsl,
             timeout: config.timeout
         });
@@ -57,10 +54,10 @@ function download(requestUrl, downloadPath, config) {
         let operation = retry.operation(retryOptions);
 
         operation.attempt(() => {
-            let req,
-                writeStream,
-                contentLength,
-                bytesDownloaded = 0;
+            let req;
+            let writeStream;
+            let contentLength;
+            let bytesDownloaded = 0;
 
             // The request is execute here
             req = _request(requestUrl)
@@ -80,10 +77,15 @@ function download(requestUrl, downloadPath, config) {
                 .on("end", () => {
                     // If transmission failed end without a full download
                     if (contentLength && bytesDownloaded < contentLength) {
-                        req.emit("error", createError(`Transfer closed with ${(contentLength - bytesDownloaded)} bytes remaining to read`, "EINCOMPLETE"));
+                        req.emit("error",
+                            createError(
+                                `Transfer closed with ${(contentLength - bytesDownloaded)} bytes remaining to read`,
+                                "EINCOMPLETE"
+                            )
+                        );
                     }
                 })
-                .on("error", (error) => {
+                .on("error", (error: ErrorN) => {
                     // Reject if error is not a network error
                     if (errorCodes.indexOf(error.code) === -1) {
                         return reject(error);
@@ -111,6 +113,6 @@ function download(requestUrl, downloadPath, config) {
                 });
         });
     });
-}
+};
 
-module.exports = download;
+export default download;

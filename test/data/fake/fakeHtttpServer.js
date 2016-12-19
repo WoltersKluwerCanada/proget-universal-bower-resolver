@@ -4,7 +4,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const url = require("url");
-const share = require("./share");
+const share = require("./../share");
 
 const defaultHttpHeader = {
     "Cache-Control": "private"
@@ -12,11 +12,11 @@ const defaultHttpHeader = {
 
 let header = {
     download: {
-        "Content-Length": fs.statSync(path.join(__dirname, "empty.zip")).size,
+        "Content-Length": fs.statSync(path.join(__dirname, "..", "empty.zip")).size,
         "Content-Type": "application/octet-stream"
     },
     downloadErr: {
-        "Content-Length": fs.statSync(path.join(__dirname, "empty.zip")).size + 100,
+        "Content-Length": fs.statSync(path.join(__dirname, "..", "empty.zip")).size + 100,
         "Content-Type": "application/octet-stream"
     },
     request: {
@@ -32,7 +32,7 @@ Object.assign(header.getFeed, defaultHttpHeader);
 
 let started = false;
 
-let zipPackage = fs.readFileSync(path.join(__dirname, "empty.zip"));
+let zipPackage = fs.readFileSync(path.join(__dirname, "..", "empty.zip"));
 
 /**
  * Parse a GET query to JSON
@@ -85,7 +85,7 @@ function router(request, response) {
             } else if (request.method === "GET" && partial === "/api/json/Feeds_GetFeed") {
                 responseToGetFeed(response, data);
             } else {
-                responseHtmlError(response);
+                responseToRequest(response, {});
             }
         } else {
             responseHtmlError(response);
@@ -139,7 +139,7 @@ function responseToRequest(response, data) {
     }
     else {
         response.writeHead(200, header.getFeed);
-        response.end();
+        response.end("[{}]");
     }
 }
 

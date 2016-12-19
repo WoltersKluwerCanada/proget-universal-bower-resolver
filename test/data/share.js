@@ -57,7 +57,10 @@ const bowerConfig = {
     directory: "bower_components",
     registry: {
         default: "https://bower.herokuapp.com",
-        search: [],
+        search: [
+            `http://localhost:${testPort}/upack/23`,
+            `http://localhost:${testPort}/upack/42`
+        ],
         register: "https://bower.herokuapp.com",
         publish: "https://bower.herokuapp.com"
     },
@@ -68,8 +71,12 @@ const bowerConfig = {
     color: true,
     resolvers: ["proget-universal-bower-resolver"],
     proget: {
-        registries:[`http://localhost:${testPort}/upack/23`, `http://localhost:${testPort}/upack/42`],
-        apiKeyMapping: JSON.parse(`[{"server":"http://localhost:${testPort}","key":"${testApiKey}"}]`)
+        apiKeyMapping: [
+            {
+                server: `http://localhost:${testPort}/upack/.*`,
+                key: testApiKey
+            }
+        ]
     },
     interactive: true,
     argv: {
@@ -154,5 +161,6 @@ module.exports = {
     testApiKey,
     bowerConfig,
     expectedRequestAnswer,
-    testAddress: `http://localhost:${testPort}`
+    testAddress: `http://localhost:${testPort}`,
+    fullAddress: `http://localhost:${testPort}/upack/feedName/download/bower/packageName/version`
 };

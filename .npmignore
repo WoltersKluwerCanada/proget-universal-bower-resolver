@@ -1,12 +1,21 @@
 
 /.jsdoc.json
+/.travis.yml
+/.gitattributes
+/.editorconfig
 /.istanbul.yml
+*.iml
+/.eslintrc.js
+/.eslintignore
+/src
+tslint.json
+tsconfig.json
+typings.json
+
 /test/
 /docs/
 /.idea/
 /.testResult/
 /node_modules/
-*.iml
-/.eslintrc.js
-/.eslintignore
-/lib/doc.js
+/typings/
+!/lib/

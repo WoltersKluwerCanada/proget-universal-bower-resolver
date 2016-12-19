@@ -5,16 +5,16 @@ const expect = chai.expect;
 const fs = require("fs");
 const path = require("path");
 const share = require("./data/share");
-const server = require("./data/fakeHtttpServer");
+const server = require("./data/fake/fakeHtttpServer");
 
-const download = require("../lib/download");
+const download = require("../lib/download").default;
 
 // Test the Download module methods
 describe("download", function() {
     let testFolder = path.join(__dirname, "data", "download");
 
     before(function(done) {
-        share.createTestFolder(testFolder, (err)=> {
+        share.createTestFolder(testFolder, (err) => {
             if (err) {
                 done(err);
             } else {

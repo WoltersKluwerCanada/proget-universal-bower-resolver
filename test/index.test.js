@@ -3,9 +3,19 @@
 const chai = require("chai");
 const expect = chai.expect;
 const share = require("./data/share");
-const server = require("./data/fakeHtttpServer");
+const server = require("./data/fake/fakeHtttpServer");
 
-const index = require("../lib/index")({config: share.bowerConfig});
+const index = require("../lib/index")({
+    config: share.bowerConfig,
+    logger: {
+        warn: () => {
+        },
+        log: () => {
+        },
+        debug: () => {
+        }
+    }
+});
 
 // Test the Main module methods
 describe("index", function() {
@@ -15,21 +25,29 @@ describe("index", function() {
 
     // Test the match method
     describe("match", function() {
-        it("full matching url", function() {
-            let c = share.bowerConfig.proget;
-            let url = c.registries[0].split("/upack/");
-            expect(index.match(`${url[0]}/${url[1]}/bower/packageName`)).to.be.true;
+        it("full matching url", function(done) {
+            index.match(share.fullAddress).then(
+                (res) => {
+                    if (res === true) {
+                        done();
+                    } else {
+                        done("This url is suppose to be supported");
+                    }
+                },
+                (err) => {
+                    done(err);
+                }
+            );
         });
 
         describe("partial matching url", function() {
             it("package only", function(done) {
                 index.match("packageName").then(
-                    (data) => {
-                        try {
-                            expect(data).to.be.true;
+                    (res) => {
+                        if (res === true) {
                             done();
-                        } catch (e) {
-                            done(e);
+                        } else {
+                            done("This url is suppose to be supported");
                         }
                     },
                     (err) => {
@@ -39,11 +57,22 @@ describe("index", function() {
             });
         });
 
-        it("full not matching url", function() {
-            expect(index.match("http://something-random.test")).to.be.false;
+        it("full not matching url", function(done) {
+            index.match("http://something-random.test").then(
+                (res) => {
+                    if (res === true) {
+                        done("This url is not suppose to be supported");
+                    } else {
+                        done();
+                    }
+                },
+                (err) => {
+                    done(err);
+                }
+            );
         });
 
-        it("partial not matching url", function(done) {
+        it("not supported package", function(done) {
             index.match("angular").then(
                 (data) => {
                     try {
@@ -60,37 +89,20 @@ describe("index", function() {
         });
     });
 
-    // Test the locate method
-    describe("locate", function() {
-        it("full source", function() {
-            expect(index.locate("proget.test?feed/bower/packageName")).equal("proget.test?feed/bower/packageName");
-        });
-
-        it("full source from IP", function() {
-            expect(index.locate("1.2.3.4?feed/bower/packageName")).equal("1.2.3.4?feed/bower/packageName");
-        });
-    });
-
     // Test the releases method
     it("releases", function(done) {
-        index.releases(`${share.testAddress}?feedName/bower/packageName`).then(
+        index.match("packageName").then(
             (res) => {
-                try {
-                    expect(res).eql([
-                        {
-                            "release": "1.1.1",
-                            "target": "1.1.1",
-                            "version": "1.1.1"
-                        },
-                        {
-                            "release": "2.2.2",
-                            "target": "2.2.2",
-                            "version": "2.2.2"
-                        }
-                    ]);
-                    done();
-                } catch (e) {
-                    done(e);
+                if (res === true) {
+                    try {
+                        expect(index.releases("packageName")).to.have.lengthOf(4);
+
+                        done();
+                    } catch (e) {
+                        done(e);
+                    }
+                } else {
+                    done("This url is suppose to be supported");
                 }
             },
             (err) => {
@@ -103,8 +115,8 @@ describe("index", function() {
     describe("fetch", function() {
         let endpoint = {
             name: "packageName",
-            target: "1.1.1",
-            source: `${share.testAddress}?feedName/bower/packageName`,
+            target: `${share.testAddress}/upack/feedName#1.1.1`,
+            source: "packageName",
             registry: true
         };
 
@@ -132,16 +144,22 @@ describe("index", function() {
         // Try like if bower already have the package in cache
         it("with version in cache", function() {
             let cached = {
-                endpoint: endpoint,
-                release: "1.1.1",
-                version: "1.1.1",
-                resolution: {}
+                "releases": [
+                    {
+                        "target": `${share.testAddress}/upack/feedName#1.0.0`,
+                        "version": "1.0.0"
+                    },
+                    {
+                        "target": `${share.testAddress}/upack/feedName#2.0.0`,
+                        "version": "2.0.0"
+                    }
+                ]
             };
 
             let res = index.fetch(endpoint, cached);
 
             // If the method is ignore, it return undefined
-            expect(res).be.a("undefined");
+            expect(res).eql({});
         });
     });
 

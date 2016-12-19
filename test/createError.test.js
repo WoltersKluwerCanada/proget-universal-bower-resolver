@@ -3,7 +3,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 
-const createError = require("../lib/createError");
+const createError = require("../lib/createError").default;
 
 // Test the CreateError module methods
 describe("createError", function() {
