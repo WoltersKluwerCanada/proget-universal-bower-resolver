@@ -80,16 +80,6 @@ class ProgetApi {
     }
 
     /**
-     * Validate that the provide regex will only point to universal ProGet feeds
-     *
-     * @param {string} regex - The regex to validate
-     * @returns {boolean}
-     */
-    public static validateRegexScope(regex: string): boolean {
-        return /upack/.test(regex);
-    }
-
-    /**
      * Parse the server response into bower understandable format when asking for package available version(s)
      *
      * @param {string} response - The server response
@@ -138,13 +128,11 @@ class ProgetApi {
             for (let i = 0, j = bower.config.proget.apiKeyMapping.length; i < j; ++i) {
                 let mapping = bower.config.proget.apiKeyMapping[i];
 
-                if (!ProgetApi.validateRegexScope(mapping.server.toString())) {
-                    this.logger.warn("proget-universal-bower-resolver",
-                        `The regex ${mapping.server} may allow other feed type then ProGet Universal ones.` +
-                        `Please validate that your regex contain "upack" in it.`);
+                // Add /upack/ at the end of the server address if not already there
+                if (!/\/upack\//.test(mapping.server)) {
+                    mapping.server = `${mapping.server.replace(/\/$/, "")}/upack/`;
                 }
-                // Convert string parameters to regex
-                mapping.server = new RegExp(mapping.server);
+                mapping._serverRegEx = new RegExp(mapping.server.replace("/", "\/").replace(".", "\."));
             }
 
             this.conf = bower.config.proget.apiKeyMapping;
@@ -159,7 +147,7 @@ class ProgetApi {
         } else {
             for (let i = 0, j = bower.config.registry.search.length; i < j; i++) {
                 for (let k = 0, l = this.conf.length; k < l; ++k) {
-                    if (this.conf[k].server.test(bower.config.registry.search[i])) {
+                    if (this.conf[k]._serverRegEx.test(bower.config.registry.search[i])) {
                         this.registries.push(bower.config.registry.search[i]);
                     }
                 }
@@ -209,7 +197,7 @@ class ProgetApi {
     public isSupportedSource(source: string): boolean {
         // Check if formatted in our config style
         for (let i = 0, j = this.conf.length; i < j; ++i) {
-            if (this.conf[i].server.test(source)) {
+            if (this.conf[i]._serverRegEx.test(source)) {
                 return true;
             }
         }
@@ -280,7 +268,7 @@ class ProgetApi {
             let adr = `${rUrl[0]}/api/json/${apiMethod}`;
 
             let registry = this.conf.find((el) => {
-                return el.server.test(source);
+                return el._serverRegEx.test(source);
             });
 
             if (registry) {

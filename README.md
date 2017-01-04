@@ -29,8 +29,8 @@ Add/modify the `.bowerrc` file:
     "proget": {
         "apiKeyMapping": [
             {
-                "server": "server <RegEx>; ex: http(s)?:\\/\\/.*\\/upack\\/.*",
-                "key" : "<String>"
+                "server": "<string>",
+                "key" : "<string>"
             }
             /* [...] */
         ]

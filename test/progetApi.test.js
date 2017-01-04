@@ -42,17 +42,6 @@ describe("progetApi", function() {
         });
     });
 
-    // Test the validateRegexScope method
-    describe("validateRegexScope", function() {
-        it("valid", function() {
-            expect(progetAPI.validateRegexScope(`${share.testAddress}/upack/feedName`)).to.be.true;
-        });
-
-        it("not valid", function() {
-            expect(progetAPI.validateRegexScope("https://bower.herokuapp.com")).to.be.false;
-        });
-    });
-
     // Test the extractReleases method
     it("extractReleases", function() {
         let out = progetAPI.extractReleases(share.expectedRequestAnswer.forPkgInfo1, `${share.testAddress}/upack/feedName`);
