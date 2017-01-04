@@ -1,5 +1,5 @@
 declare interface ProGetConf {
-    apiKeyMapping: Array<ProGetApiConf>;
+    apiKeyMapping: ProGetApiConf[];
 }
 
 declare interface ProGetApiConf {

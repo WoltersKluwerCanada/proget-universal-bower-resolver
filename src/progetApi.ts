@@ -129,10 +129,10 @@ class ProgetApi {
                 let mapping = bower.config.proget.apiKeyMapping[i];
 
                 // Add /upack/ at the end of the server address if not already there
-                if (!/\/upack\//.test(mapping.server)) {
+                if (!/\/upack/.test(mapping.server)) {
                     mapping.server = `${mapping.server.replace(/\/$/, "")}/upack/`;
                 }
-                mapping._serverRegExp = new RegExp(mapping.server.replace("/", "\/").replace(".", "\."));
+                mapping._serverRegExp = new RegExp(mapping.server.replace(/\./g, "\\."));
             }
 
             this.conf = bower.config.proget.apiKeyMapping;

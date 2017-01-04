@@ -73,7 +73,7 @@ const bowerConfig = {
     proget: {
         apiKeyMapping: [
             {
-                server: `http://localhost:${testPort}/upack/.*`,
+                server: `http://localhost:${testPort}`,
                 key: testApiKey
             }
         ]
