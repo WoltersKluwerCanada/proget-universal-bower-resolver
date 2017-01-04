@@ -132,7 +132,7 @@ class ProgetApi {
                 if (!/\/upack\//.test(mapping.server)) {
                     mapping.server = `${mapping.server.replace(/\/$/, "")}/upack/`;
                 }
-                mapping._serverRegEx = new RegExp(mapping.server.replace("/", "\/").replace(".", "\."));
+                mapping._serverRegExp = new RegExp(mapping.server.replace("/", "\/").replace(".", "\."));
             }
 
             this.conf = bower.config.proget.apiKeyMapping;
@@ -147,7 +147,7 @@ class ProgetApi {
         } else {
             for (let i = 0, j = bower.config.registry.search.length; i < j; i++) {
                 for (let k = 0, l = this.conf.length; k < l; ++k) {
-                    if (this.conf[k]._serverRegEx.test(bower.config.registry.search[i])) {
+                    if (this.conf[k]._serverRegExp.test(bower.config.registry.search[i])) {
                         this.registries.push(bower.config.registry.search[i]);
                     }
                 }
@@ -197,7 +197,7 @@ class ProgetApi {
     public isSupportedSource(source: string): boolean {
         // Check if formatted in our config style
         for (let i = 0, j = this.conf.length; i < j; ++i) {
-            if (this.conf[i]._serverRegEx.test(source)) {
+            if (this.conf[i]._serverRegExp.test(source)) {
                 return true;
             }
         }
@@ -268,7 +268,7 @@ class ProgetApi {
             let adr = `${rUrl[0]}/api/json/${apiMethod}`;
 
             let registry = this.conf.find((el) => {
-                return el._serverRegEx.test(source);
+                return el._serverRegExp.test(source);
             });
 
             if (registry) {

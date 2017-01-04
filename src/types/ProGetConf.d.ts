@@ -4,6 +4,6 @@ declare interface ProGetConf {
 
 declare interface ProGetApiConf {
     server: string;
-    _serverRegEx: RegExp;
+    _serverRegExp: RegExp;
     key: string;
 }
