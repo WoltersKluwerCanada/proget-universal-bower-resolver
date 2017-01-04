@@ -45,7 +45,7 @@ Where:
 
 | Key                         | Description                                                         | Require  |
 |-----------------------------|---------------------------------------------------------------------|----------|
-| proget.apiKeyMapping.server | A regex use to filter your ProGet Universal feeds by the server.    | Yes      |
+| proget.apiKeyMapping.server | A string use to associate the ApiKey with a server use as registry. | Yes      |
 | proget.apiKeyMapping.Key    | Is the API_Key use to communicate with the API of the above server. | Yes      |
 
 
