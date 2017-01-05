@@ -132,7 +132,9 @@ class ProgetApi {
                 if (!/\/upack/.test(mapping.server)) {
                     mapping.server = `${mapping.server.replace(/\/$/, "")}/upack/`;
                 }
-                mapping._serverRegExp = new RegExp(mapping.server.replace(/\./g, "\\."));
+                if (!mapping._serverRegExp) {
+                    mapping._serverRegExp = new RegExp(mapping.server.replace(/\./g, "\\."));
+                }
             }
 
             this.conf = bower.config.proget.apiKeyMapping;
