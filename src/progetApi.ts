@@ -7,6 +7,7 @@ import * as request from "request";
 import * as semver from "semver";
 import * as Url from "url";
 import createError from "./createError";
+import RetroCompatibility from "./retrocompatibility";
 
 /**
  * Format a list of tags to be consume by Bower
@@ -118,6 +119,12 @@ class ProgetApi {
         this.cachedPackages = {};
         this.logger = bower.logger;
 
+        // Validate the parameters in the configuration file and emit deprecation warnings
+        this.checkForOldConfig(bower.config);
+
+        // Parse the configuration in the retro-compatibility module
+        new RetroCompatibility(bower.config);
+
         // Set config
         if (!bower.config.proget.hasOwnProperty("apiKeyMapping")) {
             throw createError(
@@ -155,9 +162,6 @@ class ProgetApi {
                 }
             }
         }
-
-        // Validate the parameters in the configuration file
-        this.checkForOldConfig(bower.config);
     }
 
     /**
@@ -169,7 +173,7 @@ class ProgetApi {
         let warn = (parameter) => {
             this.logger.warn(
                 "pubr - conf",
-                `The parameter "${parameter}" is no more require, you can delete it from your your .bowerrc file.`
+                `The parameter "${parameter}" is deprecated, may want to update your .bowerrc file.`
             );
         };
 
@@ -187,6 +191,10 @@ class ProgetApi {
 
         if (conf.proget.hasOwnProperty("group")) {
             warn("proget.group");
+        }
+
+        if (conf.proget.hasOwnProperty("registries")) {
+            warn("proget.registries");
         }
     }
 

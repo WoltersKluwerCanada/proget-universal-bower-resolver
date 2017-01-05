@@ -5,6 +5,7 @@ declare interface ProGetConf {
     feed?: string;
     apiKey?: string;
     group?: string;
+    registries?: string[];
 }
 
 declare interface ProGetApiConf {

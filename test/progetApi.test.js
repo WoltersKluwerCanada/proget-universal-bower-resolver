@@ -8,8 +8,6 @@ const progetAPI = require("../lib/progetApi").default;
 
 // Test the Request module methods
 describe("progetApi", function() {
-    // let lastWarning;
-
     before(function(done) {
         server.startServer(done);
         this.api = new progetAPI({
