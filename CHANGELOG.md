@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.4.0 - 2017-01-05
+## v0.4.0 - 2017-01-06
 
 - Change: The parameter `proget.apiKeyMapping.server` is back to be a `string` because "RegExp in configuration file is ugly. A lot more if you need to double escape it." (@franknarf8 comment :wink:).
 - Add: Tool configuration retro-compatibility support!

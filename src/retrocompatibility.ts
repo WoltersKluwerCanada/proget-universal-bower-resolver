@@ -1,19 +1,8 @@
 "use strict";
 
 export default class RetroCompatibility {
-    private sources: string[] = [];
-    private proGetConfig: ProGetConf = {
-        apiKeyMapping: []
-    };
-    private serverNames: string[] = [];
-
-    constructor(config: BowerConfig) {
-        if (config.hasOwnProperty("proget")) {
-            this.readFrom01(config);
-            this.readFrom02(config);
-            this.readFrom03(config);
-            this.merge(config);
-        }
+    public static parse(config: BowerConfig): void {
+        const tc = new RetroCompatibility(config);
     }
 
     private static _deleteNoMoreUseProperties(properties: string[], config) {
@@ -21,6 +10,21 @@ export default class RetroCompatibility {
             if (config.proget.hasOwnProperty(properties[x])) {
                 delete config.proget[properties[x]];
             }
+        }
+    }
+
+    private sources: string[] = [];
+    private proGetConfig: ProGetConf = {
+        apiKeyMapping: []
+    };
+    private serverNames: string[] = [];
+
+    private constructor(config: BowerConfig) {
+        if (config.hasOwnProperty("proget")) {
+            this.readFrom01(config);
+            this.readFrom02(config);
+            this.readFrom03(config);
+            this.merge(config);
         }
     }
 

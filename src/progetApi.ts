@@ -123,7 +123,7 @@ class ProgetApi {
         this.checkForOldConfig(bower.config);
 
         // Parse the configuration in the retro-compatibility module
-        new RetroCompatibility(bower.config);
+        RetroCompatibility.parse(bower.config);
 
         // Set config
         if (!bower.config.proget.hasOwnProperty("apiKeyMapping")) {

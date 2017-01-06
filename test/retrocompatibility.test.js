@@ -705,8 +705,8 @@ describe("RetroCompatibility", function() {
                         },
                         // TODO validate in future if this can cause problem (multiple time the same server)
                         {
-                            key: '123456789',
-                            server: 'https://the.website1.com'
+                            key: "123456789",
+                            server: "https://the.website1.com"
                         }
                     ]
                 }
