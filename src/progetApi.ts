@@ -7,6 +7,7 @@ import * as request from "request";
 import * as semver from "semver";
 import * as Url from "url";
 import createError from "./createError";
+import RetroCompatibility from "./retrocompatibility";
 
 /**
  * Format a list of tags to be consume by Bower
@@ -47,7 +48,7 @@ function tags(refs: string[]): string[] {
  * @return {string[]}
  */
 function extractRefs(response: string): string[] {
-    let versions = [];
+    const versions = [];
     let data = {};
 
     try {
@@ -56,7 +57,7 @@ function extractRefs(response: string): string[] {
         throw e;
     }
 
-    for (let pkg in data) {
+    for (const pkg in data) {
         if (data.hasOwnProperty(pkg) && data[pkg].hasOwnProperty("Version_Text")) {
             versions.push(data[pkg].Version_Text);
         }
@@ -77,16 +78,6 @@ class ProgetApi {
      */
     public static isShortFormat(source: string): boolean {
         return (/.*\/.*/.test(source) === false) && (source.length > 0);
-    }
-
-    /**
-     * Validate that the provide regex will only point to universal ProGet feeds
-     *
-     * @param {string} regex - The regex to validate
-     * @returns {boolean}
-     */
-    public static validateRegexScope(regex: string): boolean {
-        return /upack/.test(regex);
     }
 
     /**
@@ -128,6 +119,12 @@ class ProgetApi {
         this.cachedPackages = {};
         this.logger = bower.logger;
 
+        // Validate the parameters in the configuration file and emit deprecation warnings
+        this.checkForOldConfig(bower.config);
+
+        // Parse the configuration in the retro-compatibility module
+        RetroCompatibility.parse(bower.config);
+
         // Set config
         if (!bower.config.proget.hasOwnProperty("apiKeyMapping")) {
             throw createError(
@@ -135,16 +132,17 @@ class ProgetApi {
                 "EBOWERC"
             );
         } else {
-            for (let i = 0, j = bower.config.proget.apiKeyMapping.length; i < j; ++i) {
-                let mapping = bower.config.proget.apiKeyMapping[i];
+            const apiKeyMappingL = bower.config.proget.apiKeyMapping.length;
+            for (let i = 0; i < apiKeyMappingL; ++i) {
+                const mapping = bower.config.proget.apiKeyMapping[i];
 
-                if (!ProgetApi.validateRegexScope(mapping.server.toString())) {
-                    this.logger.warn("proget-universal-bower-resolver",
-                        `The regex ${mapping.server} may allow other feed type then ProGet Universal ones.` +
-                        `Please validate that your regex contain "upack" in it.`);
+                // Add /upack/ at the end of the server address if not already there
+                if (!/\/upack/.test(mapping.server)) {
+                    mapping.server = `${mapping.server.replace(/\/$/, "")}/upack/`;
                 }
-                // Convert string parameters to regex
-                mapping.server = new RegExp(mapping.server);
+                if (!mapping._serverRegExp) {
+                    mapping._serverRegExp = new RegExp(mapping.server.replace(/\./g, "\\."));
+                }
             }
 
             this.conf = bower.config.proget.apiKeyMapping;
@@ -157,17 +155,16 @@ class ProgetApi {
                 "EBOWERC"
             );
         } else {
-            for (let i = 0, j = bower.config.registry.search.length; i < j; i++) {
-                for (let k = 0, l = this.conf.length; k < l; ++k) {
-                    if (this.conf[k].server.test(bower.config.registry.search[i])) {
+            const searchL = bower.config.registry.search.length;
+            for (let i = 0; i < searchL; i++) {
+                const thisConfL = this.conf.length;
+                for (let k = 0; k < thisConfL; ++k) {
+                    if (this.conf[k]._serverRegExp.test(bower.config.registry.search[i])) {
                         this.registries.push(bower.config.registry.search[i]);
                     }
                 }
             }
         }
-
-        // Validate the parameters in the configuration file
-        this.checkForOldConfig(bower.config);
     }
 
     /**
@@ -176,10 +173,10 @@ class ProgetApi {
      * @param {BowerConfig} conf - The Bower configuration
      */
     public checkForOldConfig(conf: BowerConfig) {
-        let warn = (parameter) => {
+        const warn = (parameter) => {
             this.logger.warn(
                 "pubr - conf",
-                `The parameter "${parameter}" is no more require, you can delete it from your your .bowerrc file.`
+                `The parameter "${parameter}" is deprecated, may want to update your .bowerrc file.`
             );
         };
 
@@ -198,6 +195,10 @@ class ProgetApi {
         if (conf.proget.hasOwnProperty("group")) {
             warn("proget.group");
         }
+
+        if (conf.proget.hasOwnProperty("registries")) {
+            warn("proget.registries");
+        }
     }
 
     /**
@@ -208,8 +209,9 @@ class ProgetApi {
      */
     public isSupportedSource(source: string): boolean {
         // Check if formatted in our config style
-        for (let i = 0, j = this.conf.length; i < j; ++i) {
-            if (this.conf[i].server.test(source)) {
+        const confL = this.conf.length;
+        for (let i = 0; i < confL; ++i) {
+            if (this.conf[i]._serverRegExp.test(source)) {
                 return true;
             }
         }
@@ -261,7 +263,7 @@ class ProgetApi {
      * @param {RequestParameters} params - Parameters use in the query
      */
     public findFeedId(url: string, resolve: Function, reject: Function, params: RequestParameters) {
-        let reqID = `${url.split("/upack/")[0]}/api/json/Feeds_GetFeed`;
+        const reqID = `${url.split("/upack/")[0]}/api/json/Feeds_GetFeed`;
 
         this.communicate(url, reqID, resolve, reject, {Feed_Name: params.Feed_Id, API_Key: params.API_Key});
     }
@@ -276,16 +278,16 @@ class ProgetApi {
      */
     public sendRequest(source: string, pkg: string, apiMethod: string): Promise<any> {
         return new Promise((resolve, reject) => {
-            let rUrl = source.split("/upack/");
-            let adr = `${rUrl[0]}/api/json/${apiMethod}`;
+            const rUrl = source.split("/upack/");
+            const adr = `${rUrl[0]}/api/json/${apiMethod}`;
 
-            let registry = this.conf.find((el) => {
-                return el.server.test(source);
+            const registry = this.conf.find((el) => {
+                return el._serverRegExp.test(source);
             });
 
             if (registry) {
                 // Prepare the request
-                let params = {
+                const params = {
                     API_Key: registry.key || "",
                     Feed_Id: rUrl[1],
                     Group_Name: "bower",
@@ -331,7 +333,7 @@ class ProgetApi {
         return this.sendRequest(source, null, "Feeds_GetFeed").then(
             (detailsJson: string) => {
                 if (detailsJson) {
-                    let details = JSON.parse(detailsJson);
+                    const details = JSON.parse(detailsJson);
                     return {
                         description: details.Feed_Description,
                         id: details.Feed_Id,
@@ -355,10 +357,11 @@ class ProgetApi {
         if (ProgetApi.isShortFormat(pkg)) {
             // We will scan all the sources that match the regex.
             return new Promise((resolve: Function, reject: Function) => {
-                let promises = [];
+                const promises = [];
                 let out: ReleaseTags[] = [];
 
-                for (let i = 0, j = this.registries.length; i < j; ++i) {
+                const registriesL = this.registries.length;
+                for (let i = 0; i < registriesL; ++i) {
                     promises.push(this.sendRequest(this.registries[i], pkg, "ProGetPackages_GetPackageVersions")
                         .then((response: string) => {
                             out = out.concat(ProgetApi.extractReleases(response, this.registries[i]));

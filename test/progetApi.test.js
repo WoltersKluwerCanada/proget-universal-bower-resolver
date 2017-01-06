@@ -8,8 +8,6 @@ const progetAPI = require("../lib/progetApi").default;
 
 // Test the Request module methods
 describe("progetApi", function() {
-    // let lastWarning;
-
     before(function(done) {
         server.startServer(done);
         this.api = new progetAPI({
@@ -39,17 +37,6 @@ describe("progetApi", function() {
 
         it("long tool not supported name", function() {
             expect(progetAPI.isShortFormat("http://some.random.vwesite.fake/")).to.be.false;
-        });
-    });
-
-    // Test the validateRegexScope method
-    describe("validateRegexScope", function() {
-        it("valid", function() {
-            expect(progetAPI.validateRegexScope(`${share.testAddress}/upack/feedName`)).to.be.true;
-        });
-
-        it("not valid", function() {
-            expect(progetAPI.validateRegexScope("https://bower.herokuapp.com")).to.be.false;
         });
     });
 

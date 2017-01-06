@@ -19,7 +19,7 @@ tmp.setGracefulCleanup();
  * @return {{match: Function, releases: Function, fetch: Function}}
  */
 const resolver = (bower: Bower) => {
-    let api = new ProgetAPI(bower);
+    const api = new ProgetAPI(bower);
 
     return {
         /**
@@ -57,9 +57,9 @@ const resolver = (bower: Bower) => {
         fetch: (endpoint, cached) => {
             // TODO Bring back this line once Node 6 is the oldest supported Node version
             // let [src, version] = endpoint.target.split("#");
-            let part = endpoint.target.split("#");
-            let src = part[0];
-            let version = part[1];
+            const part = endpoint.target.split("#");
+            const src = part[0];
+            const version = part[1];
 
             if (cached.version !== version) {
                 // Url ex: http://<yourProget.com>/upack/<universal-feed-name>/download/bower/<packageName>/<0.0.0>
@@ -71,10 +71,10 @@ const resolver = (bower: Bower) => {
                     downloadUrl = `${src}/download/bower/${endpoint.source}/${version}`;
                 }
 
-                let downloadPath = tmp.dirSync({unsafeCleanup: true});
+                const downloadPath = tmp.dirSync({unsafeCleanup: true});
 
                 return download(downloadUrl, downloadPath.name, bower.config).then((archivePatch) => {
-                    let extractPath = tmp.dirSync({unsafeCleanup: true});
+                    const extractPath = tmp.dirSync({unsafeCleanup: true});
 
                     return extract(archivePatch, extractPath.name).then(() => {
                         downloadPath.removeCallback();

@@ -27,12 +27,12 @@ const errorCodes = [
  * @returns {Promise}
  */
 const download = (requestUrl: string, downloadPath: string, config: BowerConfig): Promise<any> => {
-    let parsedUrl = url.parse(requestUrl);
-    let file = tmp.tmpNameSync({dir: downloadPath, postfix: ".upack"});
+    const parsedUrl = url.parse(requestUrl);
+    const file = tmp.tmpNameSync({dir: downloadPath, postfix: ".upack"});
 
     return new Promise((resolve, reject) => {
         // Prepare the retry module
-        let retryOptions = Object.assign({
+        const retryOptions = Object.assign({
             factor: 2,
             maxTimeout: 35000,
             minTimeout: 1000,
@@ -51,7 +51,7 @@ const download = (requestUrl: string, downloadPath: string, config: BowerConfig)
         _request = _request.defaults(config.request || {});
 
         // Retry on network errors
-        let operation = retry.operation(retryOptions);
+        const operation = retry.operation(retryOptions);
 
         operation.attempt(() => {
             let req;
@@ -62,7 +62,7 @@ const download = (requestUrl: string, downloadPath: string, config: BowerConfig)
             // The request is execute here
             req = _request(requestUrl)
                 .on("response", (res) => {
-                    let status = res.statusCode;
+                    const status = res.statusCode;
 
                     if (status < 200 || status >= 300) {
                         return reject(createError(`Status code of ${status} for ${requestUrl}`, "EHTTP", {
