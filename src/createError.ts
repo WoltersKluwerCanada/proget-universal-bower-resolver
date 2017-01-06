@@ -14,7 +14,7 @@ import ErrorN from "./ErrorN";
  * @return {ErrorN}
  */
 const createError = (msg: string, code: string, props?: Object): ErrorN => {
-    let err: ErrorN = new ErrorN(msg);
+    const err: ErrorN = new ErrorN(msg);
     err.code = code;
 
     if (props) {

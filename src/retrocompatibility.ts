@@ -6,7 +6,8 @@ export default class RetroCompatibility {
     }
 
     private static _deleteNoMoreUseProperties(properties: string[], config) {
-        for (let x = 0, y = properties.length; x < y; ++x) {
+        const propertiesL = properties.length;
+        for (let x = 0; x < propertiesL; ++x) {
             if (config.proget.hasOwnProperty(properties[x])) {
                 delete config.proget[properties[x]];
             }
@@ -31,7 +32,7 @@ export default class RetroCompatibility {
     private readFrom01(config: BowerConfig): void {
         // Add source
         if (config.proget.hasOwnProperty("server") && config.proget.hasOwnProperty("feed")) {
-            let s = `${config.proget.server.replace(/\/$/, "")}/upack/${config.proget.feed}`;
+            const s = `${config.proget.server.replace(/\/$/, "")}/upack/${config.proget.feed}`;
             if (this.sources.indexOf(s) === -1) {
                 this.sources.push(s);
             }
@@ -51,7 +52,8 @@ export default class RetroCompatibility {
     private readFrom02(config: BowerConfig): void {
         // Add source
         if (config.proget.hasOwnProperty("apiKeyMapping") && config.proget.hasOwnProperty("registries")) {
-            for (let x = 0, y = config.proget.registries.length; x < y; ++x) {
+            const registriesL = config.proget.registries.length;
+            for (let x = 0; x < registriesL; ++x) {
                 this.sources.push(config.proget.registries[x]);
             }
         }
@@ -61,10 +63,11 @@ export default class RetroCompatibility {
 
     private readFrom03(config: BowerConfig): void {
         let pci: ProGetApiConf;
-        let reg = /((\\.)|(\\\\)|(\.[*+?]))+/;
+        const reg = /((\\.)|(\\\\)|(\.[*+?]))+/;
 
         if (config.proget.hasOwnProperty("apiKeyMapping") && config.proget.apiKeyMapping[0].hasOwnProperty("server")) {
-            for (let x = 0, y = config.proget.apiKeyMapping.length; x < y; ++x) {
+            const apiKeyMappingL = config.proget.apiKeyMapping.length;
+            for (let x = 0; x < apiKeyMappingL; ++x) {
                 pci = config.proget.apiKeyMapping[x];
                 if (reg.test(pci.server)) {
                     this.sources.push(pci.server);
@@ -72,7 +75,7 @@ export default class RetroCompatibility {
                     // Modify config
                     pci._serverRegExp = new RegExp(pci.server);
 
-                    let index = this.sources.indexOf(pci.server);
+                    const index = this.sources.indexOf(pci.server);
                     if (index !== -1) {
                         this.sources.splice(index, 1);
                     }
@@ -88,7 +91,8 @@ export default class RetroCompatibility {
 
         // Parse the registries
         const sources = config.registry.search;
-        for (let x = 0, y = this.sources.length; x < y; ++x) {
+        const thisSourcesL = this.sources.length;
+        for (let x = 0; x < thisSourcesL; ++x) {
             if (sources.indexOf(this.sources[x]) === -1) {
                 sources.push(this.sources[x]);
             }
@@ -97,8 +101,8 @@ export default class RetroCompatibility {
         // Parse the server config
         const pc = config.proget.apiKeyMapping;
         let pci: ProGetApiConf;
-
-        for (let i = 0, j = this.proGetConfig.apiKeyMapping.length; i < j; ++i) {
+        const apiKeyMappingL = this.proGetConfig.apiKeyMapping.length;
+        for (let i = 0; i < apiKeyMappingL; ++i) {
             pci = this.proGetConfig.apiKeyMapping[i];
             if (this.serverNames.indexOf(pci.server) !== -1) {
                 this.serverNames.push(pci.server);
