@@ -7,14 +7,7 @@ const server = require("./data/fake/fakeHtttpServer");
 
 const index = require("../lib/index")({
     config: share.bowerConfig,
-    logger: {
-        warn: () => {
-        },
-        log: () => {
-        },
-        debug: () => {
-        }
-    }
+    logger: share.bowerLogger
 });
 
 // Test the Main module methods

@@ -18,7 +18,7 @@ describe("extract", function() {
 
     // Try to extract a zip archive, must fail
     it("extract an zip (Error)", function(done) {
-        extract(path.join(__dirname, "data", "empty.zip"), testFolder).then(
+        extract(path.join(__dirname, "data", "empty.zip"), testFolder, share.bowerLogger).then(
             () => {
                 done(new Error("Err: Extract is not suppose to accept zip files."));
             },
@@ -32,7 +32,7 @@ describe("extract", function() {
 
     // Extract an .upack archive
     it("extract an upack", function(done) {
-        extract(path.join(__dirname, "data", "pkg.upack"), testFolder).then(
+        extract(path.join(__dirname, "data", "pkg.upack"), testFolder, share.bowerLogger).then(
             () => {
                 // Validate that the content was extracted
                 fs.readdir(testFolder, (err, files) => {

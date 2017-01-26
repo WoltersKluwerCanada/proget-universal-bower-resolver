@@ -132,10 +132,7 @@ class ProgetApi {
                 "EBOWERC"
             );
         } else {
-            const apiKeyMappingL = bower.config.proget.apiKeyMapping.length;
-            for (let i = 0; i < apiKeyMappingL; ++i) {
-                const mapping = bower.config.proget.apiKeyMapping[i];
-
+            for (const mapping of bower.config.proget.apiKeyMapping) {
                 // Add /upack/ at the end of the server address if not already there
                 if (!/\/upack/.test(mapping.server)) {
                     mapping.server = `${mapping.server.replace(/\/$/, "")}/upack/`;
@@ -155,12 +152,10 @@ class ProgetApi {
                 "EBOWERC"
             );
         } else {
-            const searchL = bower.config.registry.search.length;
-            for (let i = 0; i < searchL; i++) {
-                const thisConfL = this.conf.length;
-                for (let k = 0; k < thisConfL; ++k) {
-                    if (this.conf[k]._serverRegExp.test(bower.config.registry.search[i])) {
-                        this.registries.push(bower.config.registry.search[i]);
+            for (const singleRegistry of bower.config.registry.search) {
+                for (const cnf of this.conf) {
+                    if (cnf._serverRegExp.test(singleRegistry)) {
+                        this.registries.push(singleRegistry);
                     }
                 }
             }
@@ -209,9 +204,8 @@ class ProgetApi {
      */
     public isSupportedSource(source: string): boolean {
         // Check if formatted in our config style
-        const confL = this.conf.length;
-        for (let i = 0; i < confL; ++i) {
-            if (this.conf[i]._serverRegExp.test(source)) {
+        for (const conf of this.conf) {
+            if (conf._serverRegExp.test(source)) {
                 return true;
             }
         }
@@ -360,11 +354,10 @@ class ProgetApi {
                 const promises = [];
                 let out: ReleaseTags[] = [];
 
-                const registriesL = this.registries.length;
-                for (let i = 0; i < registriesL; ++i) {
-                    promises.push(this.sendRequest(this.registries[i], pkg, "ProGetPackages_GetPackageVersions")
+                for (const registry of this.registries) {
+                    promises.push(this.sendRequest(registry, pkg, "ProGetPackages_GetPackageVersions")
                         .then((response: string) => {
-                            out = out.concat(ProgetApi.extractReleases(response, this.registries[i]));
+                            out = out.concat(ProgetApi.extractReleases(response, registry));
                         })
                     );
                 }

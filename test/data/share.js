@@ -86,6 +86,17 @@ const bowerConfig = {
     }
 };
 
+const bowerLogger = {
+    warn: () => {
+    },
+    log: () => {
+    },
+    debug: () => {
+    },
+    action: () => {
+    }
+};
+
 /**
  * The result we were expecting as response from the server
  *
@@ -160,6 +171,7 @@ module.exports = {
     testPort,
     testApiKey,
     bowerConfig,
+    bowerLogger,
     expectedRequestAnswer,
     testAddress: `http://localhost:${testPort}`,
     fullAddress: `http://localhost:${testPort}/upack/feedName/download/bower/packageName/version`

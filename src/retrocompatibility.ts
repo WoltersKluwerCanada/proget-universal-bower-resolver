@@ -6,10 +6,9 @@ export default class RetroCompatibility {
     }
 
     private static _deleteNoMoreUseProperties(properties: string[], config) {
-        const propertiesL = properties.length;
-        for (let x = 0; x < propertiesL; ++x) {
-            if (config.proget.hasOwnProperty(properties[x])) {
-                delete config.proget[properties[x]];
+        for (const property of properties) {
+            if (config.proget.hasOwnProperty(property)) {
+                delete config.proget[property];
             }
         }
     }
@@ -52,9 +51,8 @@ export default class RetroCompatibility {
     private readFrom02(config: BowerConfig): void {
         // Add source
         if (config.proget.hasOwnProperty("apiKeyMapping") && config.proget.hasOwnProperty("registries")) {
-            const registriesL = config.proget.registries.length;
-            for (let x = 0; x < registriesL; ++x) {
-                this.sources.push(config.proget.registries[x]);
+            for (const source of config.proget.registries) {
+                this.sources.push(source);
             }
         }
         // Delete no more useful properties
@@ -66,9 +64,8 @@ export default class RetroCompatibility {
         const reg = /((\\.)|(\\\\)|(\.[*+?]))+/;
 
         if (config.proget.hasOwnProperty("apiKeyMapping") && config.proget.apiKeyMapping[0].hasOwnProperty("server")) {
-            const apiKeyMappingL = config.proget.apiKeyMapping.length;
-            for (let x = 0; x < apiKeyMappingL; ++x) {
-                pci = config.proget.apiKeyMapping[x];
+            for (const apiKeyMapping of config.proget.apiKeyMapping) {
+                pci = apiKeyMapping;
                 if (reg.test(pci.server)) {
                     this.sources.push(pci.server);
 
@@ -91,19 +88,15 @@ export default class RetroCompatibility {
 
         // Parse the registries
         const sources = config.registry.search;
-        const thisSourcesL = this.sources.length;
-        for (let x = 0; x < thisSourcesL; ++x) {
-            if (sources.indexOf(this.sources[x]) === -1) {
-                sources.push(this.sources[x]);
+        for (const source of this.sources) {
+            if (sources.indexOf(source) === -1) {
+                sources.push(source);
             }
         }
 
         // Parse the server config
         const pc = config.proget.apiKeyMapping;
-        let pci: ProGetApiConf;
-        const apiKeyMappingL = this.proGetConfig.apiKeyMapping.length;
-        for (let i = 0; i < apiKeyMappingL; ++i) {
-            pci = this.proGetConfig.apiKeyMapping[i];
+        for (const pci of this.proGetConfig.apiKeyMapping) {
             if (this.serverNames.indexOf(pci.server) !== -1) {
                 this.serverNames.push(pci.server);
                 pc.push(pci);

@@ -13,9 +13,10 @@ import createError from "./createError";
  *
  * @param {string} src - The source directory
  * @param {string} dst - The destination directory
+ * @param {BowerLogger} logger - Logging method provide by bower
  * @returns {Promise}
  */
-const extract = (src: string, dst: string): Promise<any> => {
+const extract = (src: string, dst: string, logger: BowerLogger): Promise<any> => {
     return new Promise((resolve: Function, reject: Function) => {
         // Validate that the source is a zip archive
         if (!(/.*\.upack$/.test(src))) {
@@ -32,10 +33,13 @@ const extract = (src: string, dst: string): Promise<any> => {
                 } else {
                     // Extract archive
                     new AdmZip(src).extractAllTo(dst);
+                    logger.action("extract", "upack.json");
+
+                    resolve();
 
                     // Delete the now unwanted file upack.json
-                    fs.unlink(path.join(dst, "upack.json"), (errU) => {
-                        resolve(errU);
+                    fs.unlink(path.join(dst, "upack.json"), () => {
+                        resolve();
                     });
                 }
             }
