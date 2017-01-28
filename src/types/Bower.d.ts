@@ -1,5 +1,5 @@
 declare interface Bower {
-    logger: BowerLogger;
     config: BowerConfig;
+    logger: BowerLogger;
     version: string;
 }

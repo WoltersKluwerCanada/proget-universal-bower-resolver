@@ -3,10 +3,12 @@
   "dependencies": {
     "adm-zip": "registry:dt/adm-zip#0.4.4+20161230200718",
     "request": "registry:npm/request#2.69.0+20160428223725",
+    "rimraf": "registry:npm/rimraf#2.5.0+20160723033700",
     "semver": "registry:npm/semver#5.0.0+20160723033700",
     "tmp": "registry:dt/tmp#0.0.28+20161128184045"
   },
   "globalDependencies": {
+    "mocha": "registry:env/mocha#2.2.5+20160926180742",
     "node": "registry:env/node#6.0.0+20170119204930"
   }
 }

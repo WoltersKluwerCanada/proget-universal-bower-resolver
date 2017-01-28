@@ -99,4 +99,4 @@ const resolver = (bower: Bower) => {
     };
 };
 
-module.exports = resolver;
+export default resolver;

@@ -1,30 +1,25 @@
 "use strict";
 
-const chai = require("chai");
-const expect = chai.expect;
-const RetroCompatibility = require("../lib/retrocompatibility").default;
+import {expect} from "chai";
+import RetroCompatibility from "../src/retrocompatibility";
 
 // Test the Request module methods
 describe("RetroCompatibility", function() {
     // Parse from version 0.1.x config
     it("from version 0.1.x", function() {
-        let input = {
+        const input = {
+            proget: {
+                apiKey: "123456789",
+                apiKeyMapping: [],
+                feed: "feedName1",
+                group: "bower",
+                server: "https://the.website1.com"
+            },
             registry: {
                 search: []
-            },
-            proget: {
-                server: "https://the.website1.com",
-                apiKey: "123456789",
-                feed: "feedName1",
-                group: "bower"
             }
         };
-        let expectedOutput = {
-            registry: {
-                search: [
-                    "https://the.website1.com/upack/feedName1"
-                ]
-            },
+        const expectedOutput = {
             proget: {
                 apiKeyMapping: [
                     {
@@ -32,38 +27,38 @@ describe("RetroCompatibility", function() {
                         server: "https://the.website1.com"
                     }
                 ]
+            },
+            registry: {
+                search: [
+                    "https://the.website1.com/upack/feedName1"
+                ]
             }
         };
 
-        new RetroCompatibility(input);
+        RetroCompatibility.parse(input);
 
         expect(input).eql(expectedOutput);
     });
 
     // Parse from version 0.2.x config
     it("from version 0.2.x", function() {
-        let input = {
-            registry: {
-                search: []
-            },
+        const input = {
             proget: {
-                registries: [
-                    "https://the.website1.com/upack/feedName1"
-                ],
                 apiKeyMapping: [
                     {
-                        server: "https://the.website1.com",
-                        key: "123456789"
+                        key: "123456789",
+                        server: "https://the.website1.com"
                     }
-                ]
-            }
-        };
-        let expectedOutput = {
-            registry: {
-                search: [
+                ],
+                registries: [
                     "https://the.website1.com/upack/feedName1"
                 ]
             },
+            registry: {
+                search: []
+            }
+        };
+        const expectedOutput = {
             proget: {
                 apiKeyMapping: [
                     {
@@ -71,22 +66,22 @@ describe("RetroCompatibility", function() {
                         server: "https://the.website1.com"
                     }
                 ]
+            },
+            registry: {
+                search: [
+                    "https://the.website1.com/upack/feedName1"
+                ]
             }
         };
 
-        new RetroCompatibility(input);
+        RetroCompatibility.parse(input);
 
         expect(input).eql(expectedOutput);
     });
 
     // Parse from version 0.3.x config
     it("from version 0.3.x", function() {
-        let input = {
-            registry: {
-                search: [
-                    "https://the.website1.com/upack/feedName1"
-                ]
-            },
+        const input = {
             proget: {
                 apiKeyMapping: [
                     {
@@ -94,26 +89,31 @@ describe("RetroCompatibility", function() {
                         server: "https:\\\\/\\\\/the\\.website1\\.com"
                     }
                 ]
-            }
-        };
-        let expectedOutput = {
+            },
             registry: {
                 search: [
                     "https://the.website1.com/upack/feedName1"
                 ]
-            },
+            }
+        };
+        const expectedOutput = {
             proget: {
                 apiKeyMapping: [
                     {
+                        _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website1\\.com"),
                         key: "123456789",
-                        server: "https:\\\\/\\\\/the\\.website1\\.com",
-                        _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website1\\.com")
+                        server: "https:\\\\/\\\\/the\\.website1\\.com"
                     }
+                ]
+            },
+            registry: {
+                search: [
+                    "https://the.website1.com/upack/feedName1"
                 ]
             }
         };
 
-        new RetroCompatibility(input);
+        RetroCompatibility.parse(input);
 
         expect(input).eql(expectedOutput);
     });
@@ -121,33 +121,27 @@ describe("RetroCompatibility", function() {
     // Test request use at step releases
     describe("mixed versions", function() {
         it("from version 0.1.x and 0.2.x", function() {
-            let input = {
-                registry: {
-                    search: []
-                },
+            const input = {
                 proget: {
-                    server: "https://the.website1.com",
                     apiKey: "123456789",
+                    apiKeyMapping: [
+                        {
+                            key: "234567890",
+                            server: "https://the.website2.com"
+                        }
+                    ],
                     feed: "feedName1",
                     group: "bower",
                     registries: [
                         "https://the.website2.com/upack/feedName2"
                     ],
-                    apiKeyMapping: [
-                        {
-                            server: "https://the.website2.com",
-                            key: "234567890"
-                        }
-                    ]
+                    server: "https://the.website1.com"
+                },
+                registry: {
+                    search: []
                 }
             };
-            let expectedOutput = {
-                registry: {
-                    "search": [
-                        "https://the.website1.com/upack/feedName1",
-                        "https://the.website2.com/upack/feedName2"
-                    ]
-                },
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -159,10 +153,16 @@ describe("RetroCompatibility", function() {
                             server: "https://the.website2.com"
                         }
                     ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website1.com/upack/feedName1",
+                        "https://the.website2.com/upack/feedName2"
+                    ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -171,40 +171,33 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.1.x, 0.2.x and 0.3.x", function() {
-            let input = {
-                registry: {
-                    search: [
-                        "https://the.website3.com/upack/feedName3"
-                    ]
-                },
+            const input = {
                 proget: {
-                    server: "https://the.website1.com",
                     apiKey: "123456789",
-                    feed: "feedName1",
-                    group: "bower",
-                    registries: [
-                        "https://the.website2.com/upack/feedName2"
-                    ],
                     apiKeyMapping: [
                         {
-                            server: "https://the.website2.com",
-                            key: "234567890"
+                            key: "234567890",
+                            server: "https://the.website2.com"
                         },
                         {
                             key: "3456789012",
                             server: "https:\\\\/\\\\/the\\.website3\\.com"
                         }
+                    ],
+                    feed: "feedName1",
+                    group: "bower",
+                    registries: [
+                        "https://the.website2.com/upack/feedName2"
+                    ],
+                    server: "https://the.website1.com"
+                },
+                registry: {
+                    search: [
+                        "https://the.website3.com/upack/feedName3"
                     ]
                 }
             };
-            let expectedOutput = {
-                registry: {
-                    search: [
-                        "https://the.website1.com/upack/feedName1",
-                        "https://the.website2.com/upack/feedName2",
-                        "https://the.website3.com/upack/feedName3"
-                    ]
-                },
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -216,15 +209,22 @@ describe("RetroCompatibility", function() {
                             server: "https://the.website2.com"
                         },
                         {
+                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com"),
                             key: "3456789012",
-                            server: "https:\\\\/\\\\/the\\.website3\\.com",
-                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com")
+                            server: "https:\\\\/\\\\/the\\.website3\\.com"
                         }
+                    ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website1.com/upack/feedName1",
+                        "https://the.website2.com/upack/feedName2",
+                        "https://the.website3.com/upack/feedName3"
                     ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -233,25 +233,13 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.1.x, 0.2.x, 0.3.x and 0.4.x", function() {
-            let input = {
-                registry: {
-                    search: [
-                        "https://the.website3.com/upack/feedName3",
-                        "https://the.website4.com/upack/feedName4"
-                    ]
-                },
+            const input = {
                 proget: {
-                    server: "https://the.website1.com",
                     apiKey: "123456789",
-                    feed: "feedName1",
-                    group: "bower",
-                    registries: [
-                        "https://the.website2.com/upack/feedName2"
-                    ],
                     apiKeyMapping: [
                         {
-                            server: "https://the.website2.com",
-                            key: "234567890"
+                            key: "234567890",
+                            server: "https://the.website2.com"
                         },
                         {
                             key: "3456789012",
@@ -261,18 +249,23 @@ describe("RetroCompatibility", function() {
                             key: "456789123",
                             server: "https:the.website4.com"
                         }
-                    ]
-                }
-            };
-            let expectedOutput = {
+                    ],
+                    feed: "feedName1",
+                    group: "bower",
+                    registries: [
+                        "https://the.website2.com/upack/feedName2"
+                    ],
+                    server: "https://the.website1.com",
+
+                },
                 registry: {
                     search: [
-                        "https://the.website1.com/upack/feedName1",
-                        "https://the.website2.com/upack/feedName2",
                         "https://the.website3.com/upack/feedName3",
                         "https://the.website4.com/upack/feedName4"
                     ]
-                },
+                }
+            };
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -284,19 +277,27 @@ describe("RetroCompatibility", function() {
                             server: "https://the.website2.com"
                         },
                         {
+                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com"),
                             key: "3456789012",
-                            server: "https:\\\\/\\\\/the\\.website3\\.com",
-                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com")
+                            server: "https:\\\\/\\\\/the\\.website3\\.com"
                         },
                         {
                             key: "456789123",
                             server: "https:the.website4.com"
                         }
                     ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website1.com/upack/feedName1",
+                        "https://the.website2.com/upack/feedName2",
+                        "https://the.website3.com/upack/feedName3",
+                        "https://the.website4.com/upack/feedName4"
+                    ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -305,32 +306,26 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.1.x and 0.3.x", function() {
-            let input = {
-                registry: {
-                    search: [
-                        "https://the.website3.com/upack/feedName3"
-                    ]
-                },
+            const input = {
                 proget: {
-                    server: "https://the.website1.com",
                     apiKey: "123456789",
-                    feed: "feedName1",
-                    group: "bower",
                     apiKeyMapping: [
                         {
                             key: "3456789012",
                             server: "https:\\\\/\\\\/the\\.website3\\.com"
                         }
+                    ],
+                    feed: "feedName1",
+                    group: "bower",
+                    server: "https://the.website1.com",
+                },
+                registry: {
+                    search: [
+                        "https://the.website3.com/upack/feedName3"
                     ]
                 }
             };
-            let expectedOutput = {
-                registry: {
-                    search: [
-                        "https://the.website1.com/upack/feedName1",
-                        "https://the.website3.com/upack/feedName3"
-                    ]
-                },
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -338,15 +333,21 @@ describe("RetroCompatibility", function() {
                             server: "https://the.website1.com"
                         },
                         {
+                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com"),
                             key: "3456789012",
-                            server: "https:\\\\/\\\\/the\\.website3\\.com",
-                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com")
+                            server: "https:\\\\/\\\\/the\\.website3\\.com"
                         }
+                    ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website1.com/upack/feedName1",
+                        "https://the.website3.com/upack/feedName3"
                     ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -355,32 +356,26 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.1.x and 0.4.x", function() {
-            let input = {
-                registry: {
-                    search: [
-                        "https://the.website4.com/upack/feedName4"
-                    ]
-                },
+            const input = {
                 proget: {
-                    server: "https://the.website1.com",
                     apiKey: "123456789",
-                    feed: "feedName1",
-                    group: "bower",
                     apiKeyMapping: [
                         {
                             key: "456789123",
                             server: "https:the.website4.com"
                         }
+                    ],
+                    feed: "feedName1",
+                    group: "bower",
+                    server: "https://the.website1.com",
+                },
+                registry: {
+                    search: [
+                        "https://the.website4.com/upack/feedName4"
                     ]
                 }
             };
-            let expectedOutput = {
-                registry: {
-                    search: [
-                        "https://the.website1.com/upack/feedName1",
-                        "https://the.website4.com/upack/feedName4"
-                    ]
-                },
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -392,10 +387,16 @@ describe("RetroCompatibility", function() {
                             server: "https:the.website4.com"
                         }
                     ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website1.com/upack/feedName1",
+                        "https://the.website4.com/upack/feedName4"
+                    ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -404,16 +405,8 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.2.x and 0.3.x", function() {
-            let input = {
-                registry: {
-                    search: [
-                        "https://the.website3.com/upack/feedName3"
-                    ]
-                },
+            const input = {
                 proget: {
-                    registries: [
-                        "https://the.website2.com/upack/feedName2"
-                    ],
                     apiKeyMapping: [
                         {
                             key: "234567890",
@@ -423,16 +416,18 @@ describe("RetroCompatibility", function() {
                             key: "3456789012",
                             server: "https:\\\\/\\\\/the\\.website3\\.com"
                         }
+                    ],
+                    registries: [
+                        "https://the.website2.com/upack/feedName2"
+                    ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website3.com/upack/feedName3"
                     ]
                 }
             };
-            let expectedOutput = {
-                registry: {
-                    search: [
-                        "https://the.website2.com/upack/feedName2",
-                        "https://the.website3.com/upack/feedName3"
-                    ]
-                },
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -440,15 +435,21 @@ describe("RetroCompatibility", function() {
                             server: "https://the.website2.com"
                         },
                         {
+                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com"),
                             key: "3456789012",
-                            server: "https:\\\\/\\\\/the\\.website3\\.com",
-                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com")
+                            server: "https:\\\\/\\\\/the\\.website3\\.com"
                         }
+                    ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website2.com/upack/feedName2",
+                        "https://the.website3.com/upack/feedName3"
                     ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -457,21 +458,12 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.2.x, 0.3.x and 0.4.x", function() {
-            let input = {
-                registry: {
-                    search: [
-                        "https://the.website3.com/upack/feedName3",
-                        "https://the.website4.com/upack/feedName4"
-                    ]
-                },
+            const input = {
                 proget: {
-                    registries: [
-                        "https://the.website2.com/upack/feedName2"
-                    ],
                     apiKeyMapping: [
                         {
-                            server: "https://the.website2.com",
-                            key: "234567890"
+                            key: "234567890",
+                            server: "https://the.website2.com"
                         },
                         {
                             key: "3456789012",
@@ -481,17 +473,19 @@ describe("RetroCompatibility", function() {
                             key: "456789123",
                             server: "https:the.website4.com"
                         }
+                    ],
+                    registries: [
+                        "https://the.website2.com/upack/feedName2"
                     ]
-                }
-            };
-            let expectedOutput = {
+                },
                 registry: {
                     search: [
-                        "https://the.website2.com/upack/feedName2",
                         "https://the.website3.com/upack/feedName3",
                         "https://the.website4.com/upack/feedName4"
                     ]
-                },
+                }
+            };
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -499,19 +493,26 @@ describe("RetroCompatibility", function() {
                             server: "https://the.website2.com"
                         },
                         {
+                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com"),
                             key: "3456789012",
-                            server: "https:\\\\/\\\\/the\\.website3\\.com",
-                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com")
+                            server: "https:\\\\/\\\\/the\\.website3\\.com"
                         },
                         {
                             key: "456789123",
                             server: "https:the.website4.com"
                         }
                     ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website2.com/upack/feedName2",
+                        "https://the.website3.com/upack/feedName3",
+                        "https://the.website4.com/upack/feedName4"
+                    ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -520,35 +521,29 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.2.x and 0.4.x", function() {
-            let input = {
-                registry: {
-                    search: [
-                        "https://the.website4.com/upack/feedName4"
-                    ]
-                },
+            const input = {
                 proget: {
-                    registries: [
-                        "https://the.website2.com/upack/feedName2"
-                    ],
                     apiKeyMapping: [
                         {
-                            server: "https://the.website2.com",
-                            key: "234567890"
+                            key: "234567890",
+                            server: "https://the.website2.com"
                         },
                         {
                             key: "456789123",
                             server: "https:the.website4.com"
                         }
+                    ],
+                    registries: [
+                        "https://the.website2.com/upack/feedName2"
+                    ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website4.com/upack/feedName4"
                     ]
                 }
             };
-            let expectedOutput = {
-                registry: {
-                    search: [
-                        "https://the.website2.com/upack/feedName2",
-                        "https://the.website4.com/upack/feedName4"
-                    ]
-                },
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -560,10 +555,16 @@ describe("RetroCompatibility", function() {
                             server: "https:the.website4.com"
                         }
                     ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website2.com/upack/feedName2",
+                        "https://the.website4.com/upack/feedName4"
+                    ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -572,13 +573,7 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.3.x and 0.4.x", function() {
-            let input = {
-                registry: {
-                    search: [
-                        "https://the.website3.com/upack/feedName3",
-                        "https://the.website4.com/upack/feedName4"
-                    ]
-                },
+            const input = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -590,31 +585,37 @@ describe("RetroCompatibility", function() {
                             server: "https:the.website4.com"
                         }
                     ]
-                }
-            };
-            let expectedOutput = {
+                },
                 registry: {
                     search: [
                         "https://the.website3.com/upack/feedName3",
                         "https://the.website4.com/upack/feedName4"
                     ]
-                },
+                }
+            };
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
+                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com"),
                             key: "3456789012",
-                            server: "https:\\\\/\\\\/the\\.website3\\.com",
-                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website3\\.com")
+                            server: "https:\\\\/\\\\/the\\.website3\\.com"
                         },
                         {
                             key: "456789123",
                             server: "https:the.website4.com"
                         }
                     ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website3.com/upack/feedName3",
+                        "https://the.website4.com/upack/feedName4"
+                    ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -625,32 +626,28 @@ describe("RetroCompatibility", function() {
 
     describe("duplicated information", function() {
         it("from version 0.1.x and 0.2.x", function() {
-            let input = {
-                registry: {
-                    search: []
-                },
+            const input = {
                 proget: {
-                    server: "https://the.website1.com",
                     apiKey: "123456789",
+                    apiKeyMapping: [
+                        {
+                            key: "123456789",
+                            server: "https://the.website1.com"
+                        }
+                    ],
                     feed: "feedName1",
                     group: "bower",
                     registries: [
                         "https://the.website1.com/upack/feedName1"
                     ],
-                    apiKeyMapping: [
-                        {
-                            key: "123456789",
-                            server: "https://the.website1.com"
-                        }
-                    ]
+                    server: "https://the.website1.com"
+
+                },
+                registry: {
+                    search: []
                 }
             };
-            let expectedOutput = {
-                registry: {
-                    search: [
-                        "https://the.website1.com/upack/feedName1"
-                    ]
-                },
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -658,10 +655,15 @@ describe("RetroCompatibility", function() {
                             server: "https://the.website1.com"
                         }
                     ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website1.com/upack/feedName1"
+                    ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -670,38 +672,33 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.1.x and 0.3.x", function() {
-            let input = {
-                registry: {
-                    search: []
-                },
+            const input = {
                 proget: {
-                    server: "https://the.website1.com",
                     apiKey: "123456789",
-                    feed: "feedName1",
-                    group: "bower",
-                    registries: [
-                        "https://the.website1.com/upack/feedName1"
-                    ],
                     apiKeyMapping: [
                         {
                             key: "123456789",
                             server: "https:\\\\/\\\\/the\\.website1\\.com"
                         }
-                    ]
+                    ],
+                    feed: "feedName1",
+                    group: "bower",
+                    registries: [
+                        "https://the.website1.com/upack/feedName1"
+                    ],
+                    server: "https://the.website1.com"
+                },
+                registry: {
+                    search: []
                 }
             };
-            let expectedOutput = {
-                registry: {
-                    search: [
-                        "https://the.website1.com/upack/feedName1"
-                    ]
-                },
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
+                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website1\\.com"),
                             key: "123456789",
-                            server: "https:\\\\/\\\\/the\\.website1\\.com",
-                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website1\\.com")
+                            server: "https:\\\\/\\\\/the\\.website1\\.com"
                         },
                         // TODO validate in future if this can cause problem (multiple time the same server)
                         {
@@ -709,10 +706,15 @@ describe("RetroCompatibility", function() {
                             server: "https://the.website1.com"
                         }
                     ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website1.com/upack/feedName1"
+                    ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -721,42 +723,42 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.1.x and 0.4.x", function() {
-            let input = {
-                registry: {
-                    search: [
-                        "https://the.website1.com/upack/feedName1"
-                    ]
-                },
+            const input = {
                 proget: {
-                    server: "https://the.website1.com",
                     apiKey: "123456789",
-                    feed: "feedName1",
-                    group: "bower",
                     apiKeyMapping: [
                         {
                             key: "123456789",
                             server: "https://the.website1.com"
                         }
+                    ],
+                    feed: "feedName1",
+                    group: "bower",
+                    server: "https://the.website1.com"
+                },
+                registry: {
+                    search: [
+                        "https://the.website1.com/upack/feedName1"
                     ]
                 }
             };
-            let expectedOutput = {
-                registry: {
-                    search: [
-                        "https://the.website1.com/upack/feedName1"
-                    ]
-                },
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
                             key: "123456789",
                             server: "https://the.website1.com"
                         }
+                    ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website1.com/upack/feedName1"
                     ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -765,34 +767,29 @@ describe("RetroCompatibility", function() {
         });
 
         it("from version 0.1.x, 0.2.x and 0.4.x", function() {
-            let input = {
-                registry: {
-                    search: [
-                        "https://the.website1.com/upack/feedName1"
-                    ]
-                },
+            const input = {
                 proget: {
-                    server: "https://the.website1.com",
                     apiKey: "123456789",
+                    apiKeyMapping: [
+                        {
+                            key: "123456789",
+                            server: "https://the.website1.com"
+                        }
+                    ],
                     feed: "feedName1",
                     group: "bower",
                     registries: [
                         "https://the.website1.com/upack/feedName1"
                     ],
-                    apiKeyMapping: [
-                        {
-                            key: "123456789",
-                            server: "https://the.website1.com"
-                        }
-                    ]
-                }
-            };
-            let expectedOutput = {
+                    server: "https://the.website1.com"
+                },
                 registry: {
                     search: [
                         "https://the.website1.com/upack/feedName1"
                     ]
-                },
+                }
+            };
+            const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
                         {
@@ -800,10 +797,15 @@ describe("RetroCompatibility", function() {
                             server: "https://the.website1.com"
                         }
                     ]
+                },
+                registry: {
+                    search: [
+                        "https://the.website1.com/upack/feedName1"
+                    ]
                 }
             };
 
-            new RetroCompatibility(input);
+            RetroCompatibility.parse(input);
 
             expect(input.registry.search).to.have.members(expectedOutput.registry.search);
             expect(input.proget.apiKeyMapping).to.deep.have.members(expectedOutput.proget.apiKeyMapping);
@@ -813,14 +815,14 @@ describe("RetroCompatibility", function() {
     });
 
     it("no proget section", function() {
-        let input = {
+        const input = {
             registry: {
                 search: [
                     "https://the.website1.com/upack/feedName1"
                 ]
             }
         };
-        let expectedOutput = {
+        const expectedOutput = {
             registry: {
                 search: [
                     "https://the.website1.com/upack/feedName1"
@@ -828,7 +830,7 @@ describe("RetroCompatibility", function() {
             }
         };
 
-        new RetroCompatibility(input);
+        RetroCompatibility.parse(input);
 
         expect(input).eql(expectedOutput);
     });

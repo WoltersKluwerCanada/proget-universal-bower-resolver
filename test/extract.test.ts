@@ -1,16 +1,14 @@
 "use strict";
 
-const chai = require("chai");
-const expect = chai.expect;
-const fs = require("fs");
-const path = require("path");
-const share = require("./data/share");
-
-const extract = require("../lib/extract").default;
+import {expect} from "chai";
+import * as fs from "fs";
+import * as path from "path";
+import extract from "../src/extract";
+import * as share from "./data/share";
 
 // Test the Extract module methods
 describe("extract", function() {
-    let testFolder = path.join(__dirname, "data", "extract");
+    const testFolder = path.join(__dirname, "data", "extract");
 
     before(function(done) {
         share.createTestFolder(testFolder, done);
@@ -43,20 +41,20 @@ describe("extract", function() {
 
                         // The archive contain 3 files, but upack.json is suppose to had been deleted
                         if (files.length === 2) {
-                            let sourceUpack,
-                                extractedUpack;
+                            let sourceUpack;
+                            let extractedUpack;
 
-                            fs.readFile(path.join(__dirname, "data", "upack.json"), (err, content) => {
-                                if (err) {
-                                    done(err);
+                            fs.readFile(path.join(__dirname, "data", "upack.json"), (err_, content) => {
+                                if (err_) {
+                                    done(err_);
                                 } else {
                                     sourceUpack = content;
 
-                                    fs.readFile(path.join(testFolder, "_upack.json"), (err, content) => {
-                                        if (err) {
-                                            done(err);
+                                    fs.readFile(path.join(testFolder, "_upack.json"), (err__, content_) => {
+                                        if (err__) {
+                                            done(err__);
                                         } else {
-                                            extractedUpack = content;
+                                            extractedUpack = content_;
                                             expect(sourceUpack).eql(extractedUpack);
                                             done();
                                         }
@@ -64,7 +62,7 @@ describe("extract", function() {
                                 }
                             });
                         } else {
-                            done(new Error(`Err: Wrong number of files extracted, count ${files.length}, was suppose to only have 2.`));
+                            done(new Error(`Err: Wrong number of files extracted, count ${files.length}, want 2.`));
                         }
                     }
                 });

@@ -1,62 +1,94 @@
 "use strict";
 
-const chai = require("chai");
-const expect = chai.expect;
-const share = require("./data/share");
-const server = require("./data/fake/fakeHtttpServer");
-const progetAPI = require("../lib/progetApi").default;
+import {expect} from "chai";
+import ProgetAPI from "../src/progetApi";
+import * as server from "./data/fake/fakeHtttpServer";
+import * as share from "./data/share";
 
 // Test the Request module methods
 describe("progetApi", function() {
     before(function(done) {
         server.startServer(done);
-        this.api = new progetAPI({
+        this.api = new ProgetAPI({
             config: share.bowerConfig,
-            version: "0.0.0",
             logger: {
+                action: () => {
+                    // No need to run anything here
+                },
+                conflict: () => {
+                    // No need to run anything here
+                },
+                debug: () => {
+                    // No need to run anything here
+                },
                 error: (id, message, data) => {
                     return `id: ${id}\nmessage: ${message}\ndata: ${data}`;
+                },
+                geminate: () => {
+                    // No need to run anything here
+                },
+                info: () => {
+                    // No need to run anything here
+                },
+                intercept: () => {
+                    // No need to run anything here
+                },
+                log: () => {
+                    // No need to run anything here
+                },
+                pipe: () => {
+                    // No need to run anything here
+                },
+                prompt: () => {
+                    // No need to run anything here
+                },
+                warn: () => {
+                    // No need to run anything here
                 }
-            }
+            },
+            version: "0.0.0"
         });
     });
 
     // Test the isShortFormat method
     describe("isShortFormat", function() {
         it("shortName", function() {
-            expect(progetAPI.isShortFormat("package")).to.be.true;
+            expect(ProgetAPI.isShortFormat("package")).to.be.true;
         });
 
         it("empty", function() {
-            expect(progetAPI.isShortFormat("")).to.be.false;
+            expect(ProgetAPI.isShortFormat("")).to.be.false;
         });
 
         it("long tool supported name", function() {
-            expect(progetAPI.isShortFormat(`${share.testAddress}/upack/feedName`)).to.be.false;
+            expect(ProgetAPI.isShortFormat(`${share.testAddress}/upack/feedName`)).to.be.false;
         });
 
         it("long tool not supported name", function() {
-            expect(progetAPI.isShortFormat("http://some.random.vwesite.fake/")).to.be.false;
+            expect(ProgetAPI.isShortFormat("http://some.random.vwesite.fake/")).to.be.false;
         });
     });
 
     // Test the extractReleases method
     it("extractReleases", function() {
-        let out = progetAPI.extractReleases(share.expectedRequestAnswer.forPkgInfo1, `${share.testAddress}/upack/feedName`);
+        const out = ProgetAPI.extractReleases(
+            share.expectedRequestAnswer.forPkgInfo1,
+            `${share.testAddress}/upack/feedName`
+        );
 
         expect(out).eql([
             {
-                "target": `${share.testAddress}/upack/feedName#1.1.1`,
-                "version": "1.1.1"
+                target: `${share.testAddress}/upack/feedName#1.1.1`,
+                version: "1.1.1"
             },
             {
-                "target": `${share.testAddress}/upack/feedName#2.2.2`,
-                "version": "2.2.2"
+                target: `${share.testAddress}/upack/feedName#2.2.2`,
+                version: "2.2.2"
             }
         ]);
     });
 
-    //checkForOldConfig
+    // checkForOldConfig
     // TODO this test
 
     // Test the isSupportedSource method
@@ -70,7 +102,7 @@ describe("progetApi", function() {
         });
     });
 
-    //communicate
+    // communicate
     // TODO this test
 
     it("findFeedId", function(done) {
@@ -83,8 +115,8 @@ describe("progetApi", function() {
                 done(err);
             },
             {
-                Feed_Name: "feedName",
-                API_Key: share.testApiKey
+                API_Key: share.testApiKey,
+                Feed_Name: "feedName"
             }
         );
     });
@@ -165,7 +197,7 @@ describe("progetApi", function() {
         this.api.getFeedDetails(`${share.testAddress}/upack/23`).then(
             (rep) => {
                 try {
-                    let serverData = JSON.parse(share.expectedRequestAnswer.forFeedInfo1);
+                    const serverData = JSON.parse(share.expectedRequestAnswer.forFeedInfo1);
                     expect(rep.description).equal(serverData.Feed_Description);
                     expect(rep.name).equal(serverData.Feed_Name);
                     expect(rep.id).equal(serverData.Feed_Id);
@@ -185,7 +217,7 @@ describe("progetApi", function() {
     it("Feeds_GetFeed by name", function(done) {
         this.api.getFeedDetails(`${share.testAddress}/upack/wk-develop-bower`).then(
             (rep) => {
-                let serverData = JSON.parse(share.expectedRequestAnswer.forFeedInfo2);
+                const serverData = JSON.parse(share.expectedRequestAnswer.forFeedInfo2);
 
                 try {
                     expect(rep.description).equal(serverData.Feed_Description);

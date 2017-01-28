@@ -21,16 +21,18 @@
     "request": "^2.72.0",
     "retry": "^0.10.0",
     "semver": "^5.2.0",
-    "tmp": "^0.0.31"
+    "tmp": "^0.0.31",
+    "ts-node": "^2.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.11.14",
     "eslint": "^3.6.0",
-    "istanbul": "^0.4.3",
+    "istanbul": "^1.1.0-alpha.1",
     "jsdoc": "^3.4.0",
     "minami": "^1.1.1",
     "mocha": "^3.0.0",
+    "nyc": "^10.0.0",
     "rimraf": "^2.5.2",
     "tslint": "^4.1.1",
     "typescript": "^2.1.4",
@@ -38,17 +40,38 @@
   },
   "scripts": {
     "buildDeploy": "typings install && rimraf lib/* && tsc --sourceMap false",
-    "coverage": "istanbul cover node_modules/mocha/bin/_mocha -R ./test/*.test.js",
-    "coveralls": "istanbul cover node_modules/mocha/bin/_mocha -R ./test/*.test.js && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "coverage": "nyc npm run test:unit",
+    "coveralls": "nyc report --reporter=text-lcov npm run test:unit | coveralls",
     "jsDoc": "jsdoc --configure .jsdoc.json --verbose",
     "lint": "tslint --project tsconfig.json",
     "lintTest": "eslint test/",
     "lintAllFix": "tslint --project tsconfig.json --fix & eslint test/ --fix",
     "prepublish": "npm run buildDeploy",
-    "test": "npm run buildDeploy && npm run lint && npm run lintTest && npm run unit && npm run coverage",
-    "unit": "mocha -R spec test/*.test.js"
+    "test": "npm run buildDeploy && npm run lint && npm run lintTest && npm run test:unit && npm run coverage",
+    "test:unit": "mocha --compilers ts:ts-node/register --bail test/*.test.ts"
   },
   "engines": {
     "node": ">=4"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules/",
+      "dist/"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ],
+    "sourceMap": true,
+    "instrument": true
   }
 }

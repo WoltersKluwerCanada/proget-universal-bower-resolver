@@ -1,13 +1,14 @@
 "use strict";
 
-const chai = require("chai");
-const expect = chai.expect;
-const share = require("./data/share");
-const server = require("./data/fake/fakeHtttpServer");
+import {expect} from "chai";
+import Index from "../src/index";
+import * as server from "./data/fake/fakeHtttpServer";
+import {bowerConfig, bowerLogger, fullAddress, testAddress} from "./data/share";
 
-const index = require("../lib/index")({
-    config: share.bowerConfig,
-    logger: share.bowerLogger
+const index = Index({
+    config: bowerConfig,
+    logger: bowerLogger,
+    version: "0.0.0"
 });
 
 // Test the Main module methods
@@ -19,7 +20,7 @@ describe("index", function() {
     // Test the match method
     describe("match", function() {
         it("full matching url", function(done) {
-            index.match(share.fullAddress).then(
+            index.match(fullAddress).then(
                 (res) => {
                     if (res === true) {
                         done();
@@ -106,17 +107,17 @@ describe("index", function() {
 
     // Test the fetch method
     describe("fetch", function() {
-        let endpoint = {
+        const endpoint = {
             name: "packageName",
-            target: `${share.testAddress}/upack/feedName#1.1.1`,
+            registry: true,
             source: "packageName",
-            registry: true
+            target: `${testAddress}/upack/feedName#1.1.1`
         };
 
         // Try like if bower have not already the package in cache
         it("without cached version", function(done) {
-            let cached = {
-                endpoint: endpoint,
+            const cached = {
+                endpoint,
                 release: "1.1.1",
                 resolution: {}
             };
@@ -136,20 +137,20 @@ describe("index", function() {
 
         // Try like if bower already have the package in cache
         it("with version in cache", function() {
-            let cached = {
-                "releases": [
+            const cached = {
+                releases: [
                     {
-                        "target": `${share.testAddress}/upack/feedName#1.0.0`,
-                        "version": "1.0.0"
+                        target: `${testAddress}/upack/feedName#1.0.0`,
+                        version: "1.0.0"
                     },
                     {
-                        "target": `${share.testAddress}/upack/feedName#2.0.0`,
-                        "version": "2.0.0"
+                        target: `${testAddress}/upack/feedName#2.0.0`,
+                        version: "2.0.0"
                     }
                 ]
             };
 
-            let res = index.fetch(endpoint, cached);
+            const res = index.fetch(endpoint, cached);
 
             // If the method is ignore, it return undefined
             expect(res).eql({});

@@ -1,16 +1,16 @@
 "use strict";
 
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
-const url = require("url");
-const share = require("./../share");
+import * as  fs from "fs";
+import * as http from "http";
+import * as path from "path";
+import * as url from "url";
+import * as share from "./../share";
 
 const defaultHttpHeader = {
     "Cache-Control": "private"
 };
 
-let header = {
+const header = {
     download: {
         "Content-Length": fs.statSync(path.join(__dirname, "..", "empty.zip")).size,
         "Content-Type": "application/octet-stream"
@@ -19,10 +19,10 @@ let header = {
         "Content-Length": fs.statSync(path.join(__dirname, "..", "empty.zip")).size + 100,
         "Content-Type": "application/octet-stream"
     },
-    request: {
+    getFeed: {
         "Content-Type": "application/json"
     },
-    getFeed: {
+    request: {
         "Content-Type": "application/json"
     }
 };
@@ -32,7 +32,7 @@ Object.assign(header.getFeed, defaultHttpHeader);
 
 let started = false;
 
-let zipPackage = fs.readFileSync(path.join(__dirname, "..", "empty.zip"));
+const zipPackage = fs.readFileSync(path.join(__dirname, "..", "empty.zip"));
 
 /**
  * Parse a GET query to JSON
@@ -43,12 +43,12 @@ let zipPackage = fs.readFileSync(path.join(__dirname, "..", "empty.zip"));
 function parseQuery(query) {
     query = query || "";
 
-    let elems = query.split("&"),
-        out = {},
-        part;
+    const elems = query.split("&");
+    const out = {};
+    let part;
 
-    for (let i = 0, j = elems.length; i < j; ++i) {
-        part = elems[i].split("=");
+    for (const elem of elems) {
+        part = elem.split("=");
         out[part[0]] = part[1];
     }
 
@@ -62,25 +62,32 @@ function parseQuery(query) {
  * @param response - The server response
  */
 function router(request, response) {
-    let query = url.parse(request.url).query;
+    const query = url.parse(request.url).query;
 
-    if (request.method === "GET" && (request.url === "/upack/feedName/download/bower/packageName/version" || request.url === "/upack/feedName/download/bower/packageName/1.1.1")) {
+    if (request.method === "GET"
+        && (request.url === "/upack/feedName/download/bower/packageName/version"
+        || request.url === "/upack/feedName/download/bower/packageName/1.1.1")) {
         // Download
         responseToDownload(response);
-    } else if (request.method === "GET" && request.url === "/upack/feedName/download/bower/packageName/version.WrongSize") {
+    } else if (request.method === "GET"
+        && request.url === "/upack/feedName/download/bower/packageName/version.WrongSize") {
         // Download with file size error
         responseToDownloadWrongSize(response);
-    } else if (request.method === "GET" && request.url === "/upack/feedName/download/bower/packageName/version.BadHtmlCode") {
+    } else if (request.method === "GET"
+        && request.url === "/upack/feedName/download/bower/packageName/version.BadHtmlCode") {
         // Download with file size error
         responseHtmlError(response);
     } else {
-        let data = parseQuery(query);
-        let split = request.url.split("?");
-        let partial = split[0];
-        let params = split[1].split("&");
+        const data: any = parseQuery(query);
+        const split: string[] = request.url.split("?");
+        const partial: string = split[0];
+        const params: string[] = split[1].split("&");
 
         if (data.API_Key === share.testApiKey) {
-            if (request.method === "GET" && (partial === "/api/json/ProGetPackages_GetPackageVersions" || partial === "/api/json/ProGetPackages_GetPackages") && params.some((x)=>x.split("=")[1] === "packageName")) {
+            if (request.method === "GET"
+                && (partial === "/api/json/ProGetPackages_GetPackageVersions"
+                || partial === "/api/json/ProGetPackages_GetPackages")
+                && params.some((x) => x.split("=")[1] === "packageName")) {
                 responseToRequest(response, data);
             } else if (request.method === "GET" && partial === "/api/json/Feeds_GetFeed") {
                 responseToGetFeed(response, data);
@@ -133,7 +140,8 @@ function responseToRequest(response, data) {
     if (data.Feed_Id === "23") {
         response.writeHead(200, header.getFeed);
         response.end(share.expectedRequestAnswer.forPkgInfo1);
-    } if (data.Feed_Id === "42") {
+    }
+    if (data.Feed_Id === "42") {
         response.writeHead(200, header.getFeed);
         response.end(share.expectedRequestAnswer.forPkgInfo2);
     }
@@ -168,40 +176,44 @@ function responseToGetFeed(response, data) {
     }
 }
 
-//Create a server
+// Create a server
 const server = http.createServer(router);
 
-module.exports = {
-    /**
-     * Request to start the server
-     *
-     * @param callback - The method to call after the execution
-     */
-    startServer(callback) {
-        if (!started) {
-            started = true;
+/**
+ * Request to start the server
+ *
+ * @param callback - The method to call after the execution
+ */
+const startServer = (callback) => {
+    if (!started) {
+        started = true;
 
-            server.listen(share.testPort, () => {
-                callback();
-            });
-        } else {
+        server.listen(share.testPort, () => {
             callback();
-        }
-    },
-    /**
-     * Request to close the server
-     *
-     * @param callback - The method to call after the execution
-     */
-    stopServer(callback) {
-        if (started) {
-            started = false;
-
-            server.close(()=> {
-                callback();
-            });
-        } else {
-            callback();
-        }
+        });
+    } else {
+        callback();
     }
+};
+
+/**
+ * Request to close the server
+ *
+ * @param callback - The method to call after the execution
+ */
+const stopServer = (callback) => {
+    if (started) {
+        started = false;
+
+        server.close(() => {
+            callback();
+        });
+    } else {
+        callback();
+    }
+};
+
+export {
+    startServer,
+    stopServer
 };

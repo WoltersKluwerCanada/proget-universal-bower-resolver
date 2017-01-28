@@ -63,7 +63,10 @@ export default class RetroCompatibility {
         let pci: ProGetApiConf;
         const reg = /((\\.)|(\\\\)|(\.[*+?]))+/;
 
-        if (config.proget.hasOwnProperty("apiKeyMapping") && config.proget.apiKeyMapping[0].hasOwnProperty("server")) {
+        if (config.proget.hasOwnProperty("apiKeyMapping")
+            && config.proget.apiKeyMapping.length > 0
+            && config.proget.apiKeyMapping[0].hasOwnProperty("server")) {
+            const apiKeyMappingL = config.proget.apiKeyMapping.length;
             for (const apiKeyMapping of config.proget.apiKeyMapping) {
                 pci = apiKeyMapping;
                 if (reg.test(pci.server)) {
