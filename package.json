@@ -27,7 +27,6 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.11.14",
-    "eslint": "^3.6.0",
     "istanbul": "^1.1.0-alpha.1",
     "jsdoc": "^3.4.0",
     "minami": "^1.1.1",
@@ -44,10 +43,9 @@
     "coveralls": "nyc report --reporter=text-lcov npm run test:unit | coveralls",
     "jsDoc": "jsdoc --configure .jsdoc.json --verbose",
     "lint": "tslint --project tsconfig.json",
-    "lintTest": "eslint test/",
-    "lintAllFix": "tslint --project tsconfig.json --fix & eslint test/ --fix",
+    "lint:Fix": "tslint --project tsconfig.json --fix",
     "prepublish": "npm run buildDeploy",
-    "test": "npm run buildDeploy && npm run lint && npm run lintTest && npm run test:unit && npm run coverage",
+    "test": "npm run buildDeploy && npm run lint && npm run coverage",
     "test:unit": "mocha --compilers ts:ts-node/register --bail test/*.test.ts"
   },
   "engines": {

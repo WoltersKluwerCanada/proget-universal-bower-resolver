@@ -2,7 +2,8 @@
 
 ## v0.4.1 - 2017-01-xx
 
-- Add: Log more information on console, like the rest of Bower already do.
+- Add: Log more information on console, like the rest of Bower already does.
+- Internally: Convert tests to TypeScript.
 
 ## v0.4.0 - 2017-01-06
 
