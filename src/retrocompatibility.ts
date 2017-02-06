@@ -66,7 +66,7 @@ export default class RetroCompatibility {
         if (config.proget.hasOwnProperty("apiKeyMapping")
             && config.proget.apiKeyMapping.length > 0
             && config.proget.apiKeyMapping[0].hasOwnProperty("server")) {
-            const apiKeyMappingL = config.proget.apiKeyMapping.length;
+
             for (const apiKeyMapping of config.proget.apiKeyMapping) {
                 pci = apiKeyMapping;
                 if (reg.test(pci.server)) {

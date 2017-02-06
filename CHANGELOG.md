@@ -1,9 +1,11 @@
 # Changelog
 
-## v0.4.1 - 2017-01-xx
+## v0.4.1 - 2017-02-06
 
 - Add: Log more information on console, like the rest of Bower already does.
+- Fix: A possible error with the retrocompatibility module have been fixed.
 - Internally: Convert tests to TypeScript.
+- Internally: Remove JsDoc comments since TypeScript is enough verbose as is.
 
 ## v0.4.0 - 2017-01-06
 

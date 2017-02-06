@@ -1,17 +1,9 @@
 "use strict";
-/**
- * CreateError module.
- * @module createError
- */
+
 import ErrorN from "./ErrorN";
 
 /**
- * Create an error
- *
- * @param {string} msg - Error message
- * @param {string} code - Error code, Node.js style ex: https://nodejs.org/api/errors.html#errors_common_system_errors
- * @param {{}} [props] - Error properties
- * @return {ErrorN}
+ * Create an error Node.js style
  */
 const createError = (msg: string, code: string, props?: Object): ErrorN => {
     const err: ErrorN = new ErrorN(msg);

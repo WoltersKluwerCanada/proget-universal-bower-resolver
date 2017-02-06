@@ -1,8 +1,5 @@
 "use strict";
-/**
- * Download module.
- * @module download
- */
+
 import * as fs from "fs";
 import * as request from "request";
 import * as retry from "retry";
@@ -20,11 +17,6 @@ const errorCodes = [
 
 /**
  * Download the package from the server
- *
- * @param {string} requestUrl - The url to download the package from
- * @param {string} downloadPath - The path to download the file in
- * @param {Bower} bower - The Bower object
- * @returns {Promise}
  */
 const download = (requestUrl: string, downloadPath: string, bower: Bower): Promise<any> => {
     const config = bower.config;

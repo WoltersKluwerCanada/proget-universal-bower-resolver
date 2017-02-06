@@ -1,8 +1,8 @@
 {
   "name": "proget-universal-bower-resolver",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "The ProGet Universal Bower resolver",
-  "main": "lib/index.js",
+  "main": "lib/src/index.js",
   "keywords": [
     "bower-resolver",
     "proget"
@@ -28,21 +28,19 @@
     "chai": "^3.5.0",
     "coveralls": "^2.11.14",
     "istanbul": "^1.1.0-alpha.1",
-    "jsdoc": "^3.4.0",
-    "minami": "^1.1.1",
     "mocha": "^3.0.0",
     "nyc": "^10.0.0",
     "rimraf": "^2.5.2",
     "tslint": "^4.1.1",
-    "typescript": "^2.1.4",
+    "typescript": "~2.1.5",
     "typings": "^2.0.0"
   },
   "scripts": {
     "buildDeploy": "typings install && rimraf lib/* && tsc --sourceMap false",
     "coverage": "nyc npm run test:unit",
     "coveralls": "nyc report --reporter=text-lcov npm run test:unit | coveralls",
-    "jsDoc": "jsdoc --configure .jsdoc.json --verbose",
     "lint": "tslint --project tsconfig.json",
+    "lint:Tests": "tslint --project tsconfig.json test/**/*.test.ts",
     "lint:Fix": "tslint --project tsconfig.json --fix",
     "prepublish": "npm run buildDeploy",
     "test": "npm run buildDeploy && npm run lint && npm run coverage",
