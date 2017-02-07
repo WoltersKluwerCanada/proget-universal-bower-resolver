@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.4.1 - 2017-02-xx
+
+- Add: Log more information on console, like the rest of Bower already does.
+- Fix: A possible error with the retro compatibility module has been fixed.
+- Internally: Convert tests to TypeScript.
+- Internally: Remove JsDoc comments since TypeScript is enough verbose as is.
+- Internally: Change the decompression lib for an async one and who still under support.
+
 ## v0.4.0 - 2017-01-06
 
 - Change: The parameter `proget.apiKeyMapping.server` is back to be a `string` because "RegExp in configuration file is ugly. A lot more if you need to double escape it." (@franknarf8 comment :wink:).

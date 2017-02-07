@@ -1,8 +1,5 @@
 "use strict";
-/**
- * Proget communication module.
- * @module progetApi
- */
+
 import * as request from "request";
 import * as semver from "semver";
 import * as Url from "url";
@@ -11,10 +8,6 @@ import RetroCompatibility from "./retrocompatibility";
 
 /**
  * Format a list of tags to be consume by Bower
- *
- * @param {string[]} tags - List of semver validated tags
- * @param {string} repository - The source from where theses tags were found
- * @return {ReleaseTags[]}
  */
 function releases(tags: string[], repository: string): ReleaseTags[] {
     if (!tags.length) {
@@ -31,9 +24,6 @@ function releases(tags: string[], repository: string): ReleaseTags[] {
 
 /**
  * Validates that the references have valid semver format
- *
- * @param {string[]} refs - List of tags
- * @return {string[]}
  */
 function tags(refs: string[]): string[] {
     return refs.filter((el) => {
@@ -43,9 +33,6 @@ function tags(refs: string[]): string[] {
 
 /**
  * Parse the server response in an array of consumable version strings
- *
- * @param {string} response - The server response
- * @return {string[]}
  */
 function extractRefs(response: string): string[] {
     const versions = [];
@@ -72,9 +59,6 @@ function extractRefs(response: string): string[] {
 class ProgetApi {
     /**
      * Test if the given source is in short format
-     *
-     * @param {string} source - The source to analyse
-     * @returns {boolean}
      */
     public static isShortFormat(source: string): boolean {
         return (/.*\/.*/.test(source) === false) && (source.length > 0);
@@ -82,10 +66,6 @@ class ProgetApi {
 
     /**
      * Parse the server response into bower understandable format when asking for package available version(s)
-     *
-     * @param {string} response - The server response
-     * @param {string} repository - The address from where the response was received
-     * @return {ReleaseTags[]}
      */
     public static extractReleases(response: string, repository: string): ReleaseTags[] {
         return releases(tags(extractRefs(response)), repository);
@@ -106,8 +86,6 @@ class ProgetApi {
 
     /**
      * Prepare for communicating with ProGet
-     *
-     * @param {Bower} bower
      */
     constructor(bower: Bower) {
         this.httpProxy = bower.config.httpsProxy;
@@ -132,10 +110,7 @@ class ProgetApi {
                 "EBOWERC"
             );
         } else {
-            const apiKeyMappingL = bower.config.proget.apiKeyMapping.length;
-            for (let i = 0; i < apiKeyMappingL; ++i) {
-                const mapping = bower.config.proget.apiKeyMapping[i];
-
+            for (const mapping of bower.config.proget.apiKeyMapping) {
                 // Add /upack/ at the end of the server address if not already there
                 if (!/\/upack/.test(mapping.server)) {
                     mapping.server = `${mapping.server.replace(/\/$/, "")}/upack/`;
@@ -155,12 +130,10 @@ class ProgetApi {
                 "EBOWERC"
             );
         } else {
-            const searchL = bower.config.registry.search.length;
-            for (let i = 0; i < searchL; i++) {
-                const thisConfL = this.conf.length;
-                for (let k = 0; k < thisConfL; ++k) {
-                    if (this.conf[k]._serverRegExp.test(bower.config.registry.search[i])) {
-                        this.registries.push(bower.config.registry.search[i]);
+            for (const singleRegistry of bower.config.registry.search) {
+                for (const cnf of this.conf) {
+                    if (cnf._serverRegExp.test(singleRegistry)) {
+                        this.registries.push(singleRegistry);
                     }
                 }
             }
@@ -169,8 +142,6 @@ class ProgetApi {
 
     /**
      * Throw warnings if old configuration parameters still in the .bowerrc file
-     *
-     * @param {BowerConfig} conf - The Bower configuration
      */
     public checkForOldConfig(conf: BowerConfig) {
         const warn = (parameter) => {
@@ -203,15 +174,11 @@ class ProgetApi {
 
     /**
      * Check if the source url has an API key in configuration
-     *
-     * @param {string} source - The URL to connect to
-     * @returns {boolean}
      */
     public isSupportedSource(source: string): boolean {
         // Check if formatted in our config style
-        const confL = this.conf.length;
-        for (let i = 0; i < confL; ++i) {
-            if (this.conf[i]._serverRegExp.test(source)) {
+        for (const conf of this.conf) {
+            if (conf._serverRegExp.test(source)) {
                 return true;
             }
         }
@@ -221,12 +188,6 @@ class ProgetApi {
 
     /**
      * ProGet communication method
-     *
-     * @param {string} url - The URL to connect to
-     * @param {string} adr - The address to access
-     * @param {Function} resolve - Promise success function
-     * @param {Function} reject - Promise fail function
-     * @param {RequestParameters} params - Parameters use in the query
      */
     public communicate(url: string, adr: string, resolve: Function, reject: Function, params: RequestParameters) {
         let _request = request.defaults({
@@ -256,11 +217,6 @@ class ProgetApi {
 
     /**
      * Communicate with ProGet to get a feed ID from a name
-     *
-     * @param {string} url - The URL to connect to
-     * @param {Function} resolve - The success function
-     * @param {Function} reject - The reject function
-     * @param {RequestParameters} params - Parameters use in the query
      */
     public findFeedId(url: string, resolve: Function, reject: Function, params: RequestParameters) {
         const reqID = `${url.split("/upack/")[0]}/api/json/Feeds_GetFeed`;
@@ -270,11 +226,6 @@ class ProgetApi {
 
     /**
      * Send request to ProGet
-     *
-     * @param {string} source - The URL to connect to
-     * @param {string} pkg - The package
-     * @param {string} apiMethod - The ProGet API method to use
-     * @returns {Promise}
      */
     public sendRequest(source: string, pkg: string, apiMethod: string): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -325,9 +276,6 @@ class ProgetApi {
 
     /**
      * Acquire information from ProGet about a Feed
-     *
-     * @param {string} source - The URL to connect to
-     * @returns {Promise}
      */
     public getFeedDetails(source: string): Promise<any> {
         return this.sendRequest(source, null, "Feeds_GetFeed").then(
@@ -349,9 +297,6 @@ class ProgetApi {
 
     /**
      * Return the versions of a package from a source
-     *
-     * @param {string} pkg - Tha package to list the versions
-     * @returns {Promise}
      */
     public getPackageVersions(pkg: string): Promise<any> {
         if (ProgetApi.isShortFormat(pkg)) {
@@ -360,11 +305,10 @@ class ProgetApi {
                 const promises = [];
                 let out: ReleaseTags[] = [];
 
-                const registriesL = this.registries.length;
-                for (let i = 0; i < registriesL; ++i) {
-                    promises.push(this.sendRequest(this.registries[i], pkg, "ProGetPackages_GetPackageVersions")
+                for (const registry of this.registries) {
+                    promises.push(this.sendRequest(registry, pkg, "ProGetPackages_GetPackageVersions")
                         .then((response: string) => {
-                            out = out.concat(ProgetApi.extractReleases(response, this.registries[i]));
+                            out = out.concat(ProgetApi.extractReleases(response, registry));
                         })
                     );
                 }
@@ -402,9 +346,6 @@ class ProgetApi {
 
     /**
      * Read the cache and return the available version(s) for the package
-     *
-     * @param {string} pkg - The package
-     * @returns {ReleaseTags[]}
      */
     public readCache(pkg: string): ReleaseTags[] {
         return this.cache[pkg];
@@ -412,9 +353,6 @@ class ProgetApi {
 
     /**
      * Validate that the package can be treat by the resolver
-     *
-     * @param {string} pkg - The package to found
-     * @returns {Promise}
      */
     public isMatching(pkg: string): Promise<any> {
         return new Promise((resolve: Function, reject: Function) => {

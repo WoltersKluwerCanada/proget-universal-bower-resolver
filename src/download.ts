@@ -1,8 +1,5 @@
 "use strict";
-/**
- * Download module.
- * @module download
- */
+
 import * as fs from "fs";
 import * as request from "request";
 import * as retry from "retry";
@@ -20,13 +17,9 @@ const errorCodes = [
 
 /**
  * Download the package from the server
- *
- * @param {string} requestUrl - The url to download the package from
- * @param {string} downloadPath - The path to download the file in
- * @param {BowerConfig} config - The Bower configuration
- * @returns {Promise}
  */
-const download = (requestUrl: string, downloadPath: string, config: BowerConfig): Promise<any> => {
+const download = (requestUrl: string, downloadPath: string, bower: Bower): Promise<any> => {
+    const config = bower.config;
     const parsedUrl = url.parse(requestUrl);
     const file = tmp.tmpNameSync({dir: downloadPath, postfix: ".upack"});
 
@@ -52,6 +45,8 @@ const download = (requestUrl: string, downloadPath: string, config: BowerConfig)
 
         // Retry on network errors
         const operation = retry.operation(retryOptions);
+
+        bower.logger.action("download", requestUrl);
 
         operation.attempt(() => {
             let req;

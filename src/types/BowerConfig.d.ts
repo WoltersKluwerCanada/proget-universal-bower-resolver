@@ -1,15 +1,22 @@
 declare interface BowerConfig {
-    httpsProxy: string;
-    proxy: string;
-    ca: string;
-    strictSsl: boolean;
-    timeout: number;
-    request: string;
-    proget: ProGetConf;
+    httpsProxy?: string;
+    proxy?: string;
+    ca?: any;
+    color?: boolean;
+    directory?: string;
+    interactive?: boolean;
+    strictSsl?: boolean;
+    timeout?: number;
+    request?: string;
+    proget?: ProGetConf;
     retry?: number;
     registry: BowerConfigRegistry;
+    resolvers?: string[];
 }
 
 declare interface BowerConfigRegistry {
-    search: Array<string>;
+    default?: string;
+    publish?: string;
+    register?: string;
+    search: string[];
 }
