@@ -1,6 +1,10 @@
 # Changelog
 
-## v0.4.1 - 2017-02-xx
+## v0.4.2 - 2017-02-07
+
+- Fix: Repair resolver `ERESOLERAPI` error when use by Bower.
+
+## v0.4.1 - 2017-02-07
 
 - Add: Log more information on console, like the rest of Bower already does.
 - Fix: A possible error with the retro compatibility module has been fixed.

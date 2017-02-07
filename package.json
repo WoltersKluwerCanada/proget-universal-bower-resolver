@@ -1,8 +1,8 @@
 {
   "name": "proget-universal-bower-resolver",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "The ProGet Universal Bower resolver",
-  "main": "lib/src/index.js",
+  "main": "bin/main.js",
   "keywords": [
     "bower-resolver",
     "proget"
