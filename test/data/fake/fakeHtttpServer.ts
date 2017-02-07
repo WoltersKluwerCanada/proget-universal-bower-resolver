@@ -141,11 +141,11 @@ function responseToRequest(response, data) {
         response.writeHead(200, header.getFeed);
         response.end(share.expectedRequestAnswer.forPkgInfo1);
     }
+
     if (data.Feed_Id === "42") {
         response.writeHead(200, header.getFeed);
         response.end(share.expectedRequestAnswer.forPkgInfo2);
-    }
-    else {
+    } else {
         response.writeHead(200, header.getFeed);
         response.end("[{}]");
     }

@@ -60,7 +60,7 @@ export default class RetroCompatibility {
     }
 
     private readFrom03(config: BowerConfig): void {
-        let pci: ProGetApiConf;
+        let proGetApiConf: ProGetApiConf;
         const reg = /((\\.)|(\\\\)|(\.[*+?]))+/;
 
         if (config.proget.hasOwnProperty("apiKeyMapping")
@@ -68,14 +68,14 @@ export default class RetroCompatibility {
             && config.proget.apiKeyMapping[0].hasOwnProperty("server")) {
 
             for (const apiKeyMapping of config.proget.apiKeyMapping) {
-                pci = apiKeyMapping;
-                if (reg.test(pci.server)) {
-                    this.sources.push(pci.server);
+                proGetApiConf = apiKeyMapping;
+                if (reg.test(proGetApiConf.server)) {
+                    this.sources.push(proGetApiConf.server);
 
                     // Modify config
-                    pci._serverRegExp = new RegExp(pci.server);
+                    proGetApiConf._serverRegExp = new RegExp(proGetApiConf.server);
 
-                    const index = this.sources.indexOf(pci.server);
+                    const index = this.sources.indexOf(proGetApiConf.server);
                     if (index !== -1) {
                         this.sources.splice(index, 1);
                     }
@@ -98,11 +98,11 @@ export default class RetroCompatibility {
         }
 
         // Parse the server config
-        const pc = config.proget.apiKeyMapping;
+        const proGetConf = config.proget.apiKeyMapping;
         for (const pci of this.proGetConfig.apiKeyMapping) {
             if (this.serverNames.indexOf(pci.server) !== -1) {
                 this.serverNames.push(pci.server);
-                pc.push(pci);
+                proGetConf.push(pci);
             }
         }
     }
