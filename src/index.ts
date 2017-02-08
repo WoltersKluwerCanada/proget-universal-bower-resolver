@@ -52,7 +52,7 @@ const resolver = (bower: Bower) => {
                 const downloadPath = tmp.dirSync({unsafeCleanup: true});
 
                 return download(downloadUrl, downloadPath.name, bower).then((archivePatch) => {
-                    const extractPath = tmp.dirSync({unsafeCleanup: true});
+                    const extractPath = tmp.dirSync({unsafeCleanup: true, prefix: `${version}_${endpoint.name}_`});
 
                     return extract(archivePatch, extractPath.name, bower.logger).then(() => {
                         downloadPath.removeCallback();

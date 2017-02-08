@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.3 - 2017-02-08
+
+- Fix: Fix an `EEXIST` error that can happen if Bower call the resolver fast enough for the temp library to return twice (or more) the same folder name.
+
 ## v0.4.2 - 2017-02-07
 
 - Fix: Repair resolver `ERESOLERAPI` error when use by Bower.
