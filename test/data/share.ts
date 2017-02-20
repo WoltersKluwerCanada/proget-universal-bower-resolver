@@ -1,6 +1,7 @@
 "use strict";
 
 import * as fs from "fs";
+import * as path from "path";
 import * as rimraf from "rimraf";
 
 // Server information
@@ -13,11 +14,11 @@ const testApiKey = "banana";
  * @param {string} path - Path to the temp package
  * @param {function} callback - The method to call after the execution
  */
-const createTestFolder = (path, callback) => {
-    fs.stat(path, (err) => {
+const createTestFolder = (dest, callback) => {
+    fs.stat(dest, (err) => {
         if (err && err.code === "ENOENT") {
             // Folder don't exist
-            fs.mkdir(path, (err_) => {
+            fs.mkdir(dest, (err_) => {
                 if (err_) {
                     callback(err_);
                 } else {
@@ -26,7 +27,7 @@ const createTestFolder = (path, callback) => {
             });
         } else {
             // Clear the content of the folder, just in case
-            rimraf(path.join(path, "*"), (err_) => {
+            rimraf(path.join(dest, "*"), (err_) => {
                 if (err_) {
                     callback(err_);
                 } else {

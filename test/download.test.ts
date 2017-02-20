@@ -3,10 +3,9 @@
 import {expect} from "chai";
 import * as fs from "fs";
 import * as path from "path";
+import download from "../src/download";
 import * as server from "./data/fake/fakeHtttpServer";
 import * as share from "./data/share";
-
-import download from "../src/download";
 
 // Test the Download module methods
 describe("download", function() {
@@ -70,21 +69,30 @@ describe("download", function() {
 
     // HTTP error code when communicate with server
     it("simulate a HTML error response", function(done) {
+        // This test can be really long with all the retry and pauses between
+        this.timeout(60000);
+
         download(`${share.testAddress}/upack/feedName/download/bower/packageName/version.BadHtmlCode`,
             testFolder, {config: share.bowerConfig, logger: share.bowerLogger, version: "0.0.0"}).then(
             () => {
                 done(new Error("Error: This is suppose to fail. The file downloaded is smaller then the header tell."));
             },
             (err) => {
-                expect(err).match(/^Error: Status code of 400 for .*$/);
-                expect(err).a("Error");
-                done();
+                try {
+                    expect(err).match(/^Error: Status code of 400 for .*$/);
+                    expect(err).a("Error");
+                    done();
+                } catch (e) {
+                    done(e);
+                }
             }
         );
     });
 
     // Delete the test folder after usage
     after(function(done) {
-        share.deleteTestFolder(testFolder, done);
+        process.nextTick(() => {
+            share.deleteTestFolder(testFolder, done);
+        });
     });
 });

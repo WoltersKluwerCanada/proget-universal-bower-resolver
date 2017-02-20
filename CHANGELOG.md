@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.0 - 2017-02-xx
+
+- Add: Support for HTTP redirection.
+- Fix: Make the "retry" module work correctly.
+
 ## v0.4.3 - 2017-02-08
 
 - Fix: Fix an `EEXIST` error that can happen if Bower call the resolver fast enough for the temp library to return twice (or more) the same folder name.

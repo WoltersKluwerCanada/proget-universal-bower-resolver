@@ -192,6 +192,7 @@ class ProgetApi {
     public communicate(url: string, adr: string, resolve: Function, reject: Function, params: RequestParameters) {
         let _request = request.defaults({
             ca: this.ca,
+            followRedirect: true,
             proxy: Url.parse(url).protocol === "https:" ? this.httpProxy : this.proxy,
             qs: params,
             strictSSL: this.strictSSL,
@@ -200,14 +201,18 @@ class ProgetApi {
 
         _request = _request.defaults(this.defaultRequest || {});
 
-        _request(adr, (error, response, body) => {
+        _request.post(adr, (error, response, body) => {
+            const status = response.statusCode;
+
             if (error) {
                 reject(createError(`Request to ${url} failed: ${error.message}`, error.code));
             } else {
-                if (response.statusCode === 200) {
+                if (status === 200) {
                     resolve(body);
+                } else if (status >= 300 && status < 400) {
+                    this.communicate(url, response.headers.location.toString(), resolve, reject, params);
                 } else {
-                    reject(createError(`Request to ${url} returned ${response.statusCode} status code.`, "EREQUEST", {
+                    reject(createError(`Request to ${url} returned ${status} status code.`, "EREQUEST", {
                         details: `url: ${url}\nadr: ${adr}\n${JSON.stringify(response, null, 2)}`
                     }));
                 }
