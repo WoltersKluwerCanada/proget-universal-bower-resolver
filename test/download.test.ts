@@ -69,7 +69,7 @@ describe("download", function() {
 
     // HTTP error code when communicate with server
     it("simulate a HTML error response", function(done) {
-        // This test can be really long with all the retry and pauses between
+        // This test should be really long with all the retry and pauses between
         this.timeout(60000);
 
         download(`${share.testAddress}/upack/feedName/download/bower/packageName/version.BadHtmlCode`,

@@ -192,7 +192,6 @@ class ProgetApi {
     public communicate(url: string, adr: string, resolve: Function, reject: Function, params: RequestParameters) {
         let _request = request.defaults({
             ca: this.ca,
-            followRedirect: true,
             proxy: Url.parse(url).protocol === "https:" ? this.httpProxy : this.proxy,
             qs: params,
             strictSSL: this.strictSSL,
