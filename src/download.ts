@@ -5,28 +5,50 @@ import * as request from "request";
 import * as retry from "retry";
 import * as tmp from "tmp";
 import * as url from "url";
+import Authentication from "./Authentication";
 import createError from "./createError";
 import ErrorN from "./ErrorN";
-import Authentication from "./Authentication";
 
 /**
  * Download request
  */
-const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestInstance, auth: boolean, cb: Function): void => {
+const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestInstance, auth: boolean,
+                        cb: (err: Error, data: string) => void): void => {
     const config = bower.config;
+    const retryCommunication = (req, writeStream) => {
+        // Ensure that there are no more events from this request
+        req.removeAllListeners();
 
-    auth = auth || false;
+        // Ensure that there are no more events from the write stream
+        writeStream.removeAllListeners();
+
+        downloadRunner(file, bower, requestUrl, requestInstance, auth, cb);
+    };
+
+    let credential = {};
 
     if (auth) {
         const cred = Authentication.getInstance().getCredentialsByURI(requestUrl);
 
         if (cred) {
-            requestInstance.default({
-                'user': cred.user,
-                'pass': cred.pass
-            });
+            credential = {
+                auth: {
+                    pass: cred.password,
+                    user: cred.username
+                }
+            };
         } else {
-            bower.logger.error("auth", `No authentication set in .npmrc for current feed.`, createError(`No authentication set in .npmrc for ${requestUrl}.`, "EAUTH"));
+            // If no config for a feed is found, send an error to Bower
+            const error = createError(`Authentication error.`, "pubr - auth");
+
+            bower.logger.error(
+                "pubr - auth",
+                `No authentication set in .npmrc for: ${Authentication.nerf(requestUrl)}`,
+                error
+            );
+
+            cb(error, null);
+            return;
         }
     }
 
@@ -51,7 +73,7 @@ const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestI
         let lastError;
 
         // The request is execute here
-        req = requestInstance(requestUrl)
+        req = requestInstance(requestUrl, credential)
             .on("response", (res) => {
                 const status = res.statusCode;
 
@@ -67,32 +89,22 @@ const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestI
                     bower.logger.debug("redirect", `${requestUrl} --> ${redirection}`);
                     requestUrl = redirection;
 
-                    // Ensure that there are no more events from this request
-                    req.removeAllListeners();
-
-                    // Ensure that there are no more events from the write stream
-                    writeStream.removeAllListeners();
-
-                    downloadRunner(file, bower, requestUrl, requestInstance, auth, cb);
+                    retryCommunication(req, writeStream);
 
                     return;
                 } else if (status === 401) {
                     // Request authentication
+                    bower.logger.debug("pubr - auth", `${requestUrl} require authentication`);
+                    // To not try to authenticate infinitely
                     if (!auth) {
-                        bower.logger.debug("auth", `${requestUrl} require authentication`);
+                        auth = true;
 
-                        // Ensure that there are no more events from this request
-                        req.removeAllListeners();
-
-                        // Ensure that there are no more events from the write stream
-                        writeStream.removeAllListeners();
-
-                        downloadRunner(file, bower, requestUrl, requestInstance, true, cb);
+                        retryCommunication(req, writeStream);
 
                         return;
                     } else {
                         // The page already require for authentication and still asking for it, so this is an error
-                        req.emit("error", createError(`Status multiple code of ${status} for ${requestUrl}`, "EHTTP", {
+                        req.emit("error", createError(`Status multiple consecutive ${status} code for ${requestUrl}`, "EHTTP", {
                             details: `${res}`
                         }));
                     }

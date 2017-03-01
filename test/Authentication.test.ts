@@ -1,7 +1,7 @@
 "use strict";
 
-import * as path from "path";
 import {expect} from "chai";
+import * as path from "path";
 import Authentication from "../src/Authentication";
 
 // Test the CreateError module methods
@@ -12,6 +12,6 @@ describe("Authentication", function() {
 
         auth.cwd = path.join(__dirname, "data");
 
-        expect(auth.getCredentialsByURI("http://localhost/npm/")).eql({password: "YmFuYW5h", username: "testMan"});
+        expect(auth.getCredentialsByURI("http://localhost/npm/")).eql({password: "banana", username: "testMan"});
     });
 });

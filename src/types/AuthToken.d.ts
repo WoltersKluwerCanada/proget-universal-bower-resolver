@@ -1,4 +1,4 @@
 declare interface AuthToken {
-    user: string;
-    pass: string;
+    username: string;
+    password: string;
 }

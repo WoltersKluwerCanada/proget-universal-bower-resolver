@@ -5,7 +5,7 @@ import ErrorN from "./ErrorN";
 /**
  * Create an error Node.js style
  */
-const createError = (msg: string, code: string, props?: Object): ErrorN => {
+const createError = (msg: string, code: string, props?: object): ErrorN => {
     const err: ErrorN = new ErrorN(msg);
     err.code = code;
 
