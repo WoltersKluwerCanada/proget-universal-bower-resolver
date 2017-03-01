@@ -5,7 +5,6 @@ import * as semver from "semver";
 import * as Url from "url";
 import createError from "./createError";
 import RetroCompatibility from "./retrocompatibility";
-import Authentication from "./Authentication";
 
 /**
  * Format a list of tags to be consume by Bower
@@ -191,7 +190,7 @@ class ProgetApi {
      * ProGet communication method
      */
     public communicate(url: string, adr: string, resolve: (data: string) => void, reject: (err: Error) => void,
-                       params: RequestParameters, authentication?: boolean) {
+                       params: RequestParameters) {
         // TODO use retry here too
         let _request = request.defaults({
             ca: this.ca,
@@ -200,25 +199,6 @@ class ProgetApi {
             strictSSL: this.strictSSL,
             timeout: this.timeout
         });
-
-        if (authentication) {
-            const cred = Authentication.getInstance().getCredentialsByURI(url);
-
-            if (cred) {
-                _request.defaults({
-                    auth: {
-                        pass: cred.pass,
-                        user: cred.user
-                    }
-                });
-            } else {
-                this.logger.error(
-                    "pubr - auth",
-                    `No authentication set in .npmrc for: ${Authentication.nerf(url)}`,
-                    createError(`No authentication set in .npmrc for ${url}.`, "EAUTH")
-                );
-            }
-        }
 
         _request = _request.defaults(this.defaultRequest || {});
 
@@ -231,16 +211,7 @@ class ProgetApi {
                 if (status === 200) {
                     resolve(body);
                 } else if (status >= 300 && status < 400) {
-                    this.communicate(url, response.headers.location.toString(), resolve, reject, params, authentication);
-                } else if (status === 401) {
-                    // To only answer one time to a authentication request
-                    if (!authentication) {
-                        this.communicate(url, response.headers.location.toString(), resolve, reject, params, true);
-                    } else {
-                        reject(createError(`Status multiple code of ${status} for ${url}`, "EHTTP", {
-                            details: `${response}`
-                        }));
-                    }
+                    this.communicate(url, response.headers.location.toString(), resolve, reject, params);
                 } else {
                     reject(createError(`Request to ${url} returned ${status} status code.`, "EREQUEST", {
                         details: `url: ${url}\nadr: ${adr}\n${JSON.stringify(response, null, 2)}`

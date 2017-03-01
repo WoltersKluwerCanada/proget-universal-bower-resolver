@@ -104,9 +104,12 @@ const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestI
                         return;
                     } else {
                         // The page already require for authentication and still asking for it, so this is an error
-                        req.emit("error", createError(`Status multiple consecutive ${status} code for ${requestUrl}`, "EHTTP", {
-                            details: `${res}`
-                        }));
+                        req.emit("error",
+                            createError(`Status multiple consecutive ${status} code for ${requestUrl}`, "EHTTP", {
+                                    details: `${res}`
+                                }
+                            )
+                        );
                     }
                 } else {
                     req.emit("error", createError(`Status code of ${status} for ${requestUrl}`, "EHTTP", {
