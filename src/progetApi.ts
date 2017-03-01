@@ -190,6 +190,7 @@ class ProgetApi {
      * ProGet communication method
      */
     public communicate(url: string, adr: string, resolve: Function, reject: Function, params: RequestParameters) {
+        // TODO use retry here too
         let _request = request.defaults({
             ca: this.ca,
             proxy: Url.parse(url).protocol === "https:" ? this.httpProxy : this.proxy,
@@ -210,6 +211,9 @@ class ProgetApi {
                     resolve(body);
                 } else if (status >= 300 && status < 400) {
                     this.communicate(url, response.headers.location.toString(), resolve, reject, params);
+                } else if (status === 401) {
+                    // TODO Implement auth here
+                    console.error("The redirection for the API is not implemented yet!");
                 } else {
                     reject(createError(`Request to ${url} returned ${status} status code.`, "EREQUEST", {
                         details: `url: ${url}\nadr: ${adr}\n${JSON.stringify(response, null, 2)}`

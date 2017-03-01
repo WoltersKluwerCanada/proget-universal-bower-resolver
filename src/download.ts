@@ -7,12 +7,28 @@ import * as tmp from "tmp";
 import * as url from "url";
 import createError from "./createError";
 import ErrorN from "./ErrorN";
+import Authentication from "./Authentication";
 
 /**
  * Download request
  */
-const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestInstance, cb: Function): void => {
+const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestInstance, auth: boolean, cb: Function): void => {
     const config = bower.config;
+
+    auth = auth || false;
+
+    if (auth) {
+        const cred = Authentication.getInstance().getCredentialsByURI(requestUrl);
+
+        if (cred) {
+            requestInstance.default({
+                'user': cred.user,
+                'pass': cred.pass
+            });
+        } else {
+            bower.logger.error("auth", `No authentication set in .npmrc for current feed.`, createError(`No authentication set in .npmrc for ${requestUrl}.`, "EAUTH"));
+        }
+    }
 
     // Prepare the retry module
     const retryOptions = Object.assign({
@@ -44,6 +60,7 @@ const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestI
                 if (status >= 200 && status < 300) {
                     contentLength = Number(res.headers["content-length"]);
                 } else if (status >= 300 && status < 400) {
+                    // Redirection
                     const redirection = res.headers.location.toString();
 
                     // Get a redirection, retry with new URL
@@ -56,9 +73,29 @@ const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestI
                     // Ensure that there are no more events from the write stream
                     writeStream.removeAllListeners();
 
-                    downloadRunner(file, bower, requestUrl, requestInstance, cb);
+                    downloadRunner(file, bower, requestUrl, requestInstance, auth, cb);
 
                     return;
+                } else if (status === 401) {
+                    // Request authentication
+                    if (!auth) {
+                        bower.logger.debug("auth", `${requestUrl} require authentication`);
+
+                        // Ensure that there are no more events from this request
+                        req.removeAllListeners();
+
+                        // Ensure that there are no more events from the write stream
+                        writeStream.removeAllListeners();
+
+                        downloadRunner(file, bower, requestUrl, requestInstance, true, cb);
+
+                        return;
+                    } else {
+                        // The page already require for authentication and still asking for it, so this is an error
+                        req.emit("error", createError(`Status multiple code of ${status} for ${requestUrl}`, "EHTTP", {
+                            details: `${res}`
+                        }));
+                    }
                 } else {
                     req.emit("error", createError(`Status code of ${status} for ${requestUrl}`, "EHTTP", {
                         details: `${res}`
@@ -140,7 +177,7 @@ const download = (requestUrl: string, downloadPath: string, bower: Bower): Promi
 
         _request = _request.defaults(config.request || {});
 
-        downloadRunner(file, bower, requestUrl, _request, (err, fileName) => {
+        downloadRunner(file, bower, requestUrl, _request, false, (err, fileName) => {
             if (err) {
                 reject(err);
             } else {

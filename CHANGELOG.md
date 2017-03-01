@@ -3,6 +3,7 @@
 ## v0.5.0 - 2017-02-xx
 
 - Add: Support for HTTP redirection.
+- Add: Support for HTTP authentication, using the .npmrc data.
 - Fix: Make the "retry" module work correctly.
 
 ## v0.4.3 - 2017-02-08

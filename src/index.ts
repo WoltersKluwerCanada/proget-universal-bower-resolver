@@ -19,6 +19,7 @@ const resolver = (bower: Bower) => {
          * Tells Bower whether to use or not use this resolver for some source.
          */
         match: (source: string): Promise<any> => {
+            console.dir(bower);
             return api.isMatching(source);
         },
 
