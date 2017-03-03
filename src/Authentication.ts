@@ -27,7 +27,7 @@ export default class Authentication {
         return url.resolve(url.format(parsed).replace(/(upack|bower).*/, "npm/"), ".");
     }
 
-    private static convertNpmrcToJson(npmrcContent: string): Map<string, AuthToken> {
+    private static convertNpmrcAuthToJson(npmrcContent: string): Map<string, AuthToken> {
         const out = new Map();
 
         const foundUrlAuthInfo = /(.*):_password="(.+)"(?:\r|\n){1,2}.*username=([a-zA-Z.0-9]*)/g;
@@ -49,16 +49,16 @@ export default class Authentication {
         return out;
     }
 
-    private static mergeConfig(...configs: Array<Map<string, AuthToken>>): Map<string, AuthToken> {
+    private static mergeConfig(configs: Array<Map<string, AuthToken>>): Map<string, AuthToken> {
         let out = new Map();
 
-        if (arguments.length !== 0) {
-            if (arguments[0] && arguments[0] instanceof Map) {
-                out = arguments[0];
+        if (configs.length !== 0) {
+            if (configs[0] && configs[0] instanceof Map) {
+                out = configs[0];
             }
 
             // Parse the other configurations, the previous has priority on the second or each keys
-            for (const argument of arguments) {
+            for (const argument of configs) {
                 if (argument) {
                     for (const authToken in argument) {
                         if (argument.hasOwnProperty(authToken) && !out.hasOwnProperty(authToken)) {
@@ -72,7 +72,7 @@ export default class Authentication {
         return out;
     }
 
-    public cwd = process.cwd();
+    private possibleDirectories: string[] = [process.cwd()];
     private passwordFile: string = ".npmrc";
     private cache: Map<string, AuthToken>;
 
@@ -95,16 +95,25 @@ export default class Authentication {
         }
     }
 
+    public  addPossibleConfigFolder(folder: string): void {
+        this.possibleDirectories.unshift(folder);
+    }
+
     private setCache(): void {
-        // Read the project config
-        const projectConfig = Authentication.convertNpmrcToJson(this.readConfigFile(this.cwd));
+        const out: Array<Map<string, AuthToken>> = [];
+
+        out.push(this.cache);
+
+        for (const directory of this.possibleDirectories) {
+            out.push(Authentication.convertNpmrcAuthToJson(this.readConfigFile(directory)));
+        }
 
         // Read the user config
-        const userConfig = Authentication.convertNpmrcToJson(this.readConfigFile(os.homedir()));
+        out.push(Authentication.convertNpmrcAuthToJson(this.readConfigFile(os.homedir())));
 
         // TODO In the future find a way to read the global config
 
-        this.cache = Authentication.mergeConfig(projectConfig, userConfig);
+        this.cache = Authentication.mergeConfig(out);
     }
 
     private readConfigFile(filePath: string): string {

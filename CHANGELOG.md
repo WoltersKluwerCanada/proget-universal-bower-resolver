@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.5.0 - 2017-02-xx
+## v0.5.0 - 2017-03-xx
 
 - Add: Support for HTTP redirection.
 - Add: Support for HTTP authentication, using the .npmrc data.

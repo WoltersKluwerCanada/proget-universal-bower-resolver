@@ -9,6 +9,25 @@ import Authentication from "./Authentication";
 import createError from "./createError";
 import ErrorN from "./ErrorN";
 
+const authenticationProvider = (auth: boolean, requestUrl: string): ErrorN | {} => {
+    if (auth) {
+        const cred = Authentication.getInstance().getCredentialsByURI(requestUrl);
+
+        if (cred) {
+            return {
+                auth: {
+                    pass: cred.password,
+                    user: cred.username
+                }
+            };
+        } else {
+            return createError(`Authentication error.`, "pubr - auth");
+        }
+    }
+
+    return {};
+};
+
 /**
  * Download request
  */
@@ -25,31 +44,18 @@ const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestI
         downloadRunner(file, bower, requestUrl, requestInstance, auth, cb);
     };
 
-    let credential = {};
+    const credential = authenticationProvider(auth, requestUrl);
 
-    if (auth) {
-        const cred = Authentication.getInstance().getCredentialsByURI(requestUrl);
+    if (credential instanceof ErrorN) {
+        // If no config for a feed is found, send an error to Bower
+        bower.logger.error(
+            "pubr - auth",
+            `No authentication set in .npmrc for: ${Authentication.nerf(requestUrl)}`,
+            credential
+        );
 
-        if (cred) {
-            credential = {
-                auth: {
-                    pass: cred.password,
-                    user: cred.username
-                }
-            };
-        } else {
-            // If no config for a feed is found, send an error to Bower
-            const error = createError(`Authentication error.`, "pubr - auth");
-
-            bower.logger.error(
-                "pubr - auth",
-                `No authentication set in .npmrc for: ${Authentication.nerf(requestUrl)}`,
-                error
-            );
-
-            cb(error, null);
-            return;
-        }
+        cb(credential, null);
+        return;
     }
 
     // Prepare the retry module

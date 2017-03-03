@@ -6,7 +6,7 @@ import * as rimraf from "rimraf";
 
 // Server information
 const testPort = "8080";
-const testApiKey = "banana";
+const testApiKey = "testP4ssw0rd";
 
 /**
  * Create a temp folder
