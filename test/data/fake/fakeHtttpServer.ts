@@ -64,17 +64,14 @@ function parseQuery(query) {
 function router(request, response) {
     const query = url.parse(request.url).query;
 
-    if (request.method === "GET"
-        && (request.url === "/upack/feedName/download/bower/packageName/version"
+    if ((request.url === "/upack/feedName/download/bower/packageName/version"
         || request.url === "/upack/feedName/download/bower/packageName/1.1.1")) {
         // Download
         responseToDownload(response);
-    } else if (request.method === "GET"
-        && request.url === "/upack/feedName/download/bower/packageName/version.WrongSize") {
+    } else if (request.url === "/upack/feedName/download/bower/packageName/version.WrongSize") {
         // Download with file size error
         responseToDownloadWrongSize(response);
-    } else if (request.method === "GET"
-        && request.url === "/upack/feedName/download/bower/packageName/version.BadHtmlCode") {
+    } else if (request.url === "/upack/feedName/download/bower/packageName/version.BadHtmlCode") {
         // Download with file size error
         responseHtmlError(response);
     } else {
@@ -84,12 +81,11 @@ function router(request, response) {
         const params: string[] = split[1].split("&");
 
         if (data.API_Key === share.testApiKey) {
-            if (request.method === "GET"
-                && (partial === "/api/json/ProGetPackages_GetPackageVersions"
+            if ((partial === "/api/json/ProGetPackages_GetPackageVersions"
                 || partial === "/api/json/ProGetPackages_GetPackages")
                 && params.some((x) => x.split("=")[1] === "packageName")) {
                 responseToRequest(response, data);
-            } else if (request.method === "GET" && partial === "/api/json/Feeds_GetFeed") {
+            } else if (request.method === "POST" && partial === "/api/json/Feeds_GetFeed") {
                 responseToGetFeed(response, data);
             } else {
                 responseToRequest(response, {});

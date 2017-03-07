@@ -10,3 +10,4 @@
 /lib/
 /typings/
 /.nyc_output/
+/yarn.lock

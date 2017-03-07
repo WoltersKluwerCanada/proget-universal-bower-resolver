@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.0 - 2017-03-xx
+
+- Add: Support for HTTP redirection.
+- Add: Support for HTTP authentication, using the .npmrc data.
+- Fix: Make the "retry" module work correctly.
+
 ## v0.4.3 - 2017-02-08
 
 - Fix: Fix an `EEXIST` error that can happen if Bower call the resolver fast enough for the temp library to return twice (or more) the same folder name.

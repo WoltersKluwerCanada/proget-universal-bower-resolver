@@ -78,7 +78,7 @@ class ProgetApi {
     private strictSSL: boolean = true;
     private timeout: number;
     private defaultRequest: string;
-    private cachedPackages: Object;
+    private cachedPackages: object;
     private logger: BowerLogger;
     private conf: ProGetApiConf[];
     private registries: string[] = [];
@@ -189,7 +189,9 @@ class ProgetApi {
     /**
      * ProGet communication method
      */
-    public communicate(url: string, adr: string, resolve: Function, reject: Function, params: RequestParameters) {
+    public communicate(url: string, adr: string, resolve: (data: string) => void, reject: (err: Error) => void,
+                       params: RequestParameters) {
+        // TODO use retry here too
         let _request = request.defaults({
             ca: this.ca,
             proxy: Url.parse(url).protocol === "https:" ? this.httpProxy : this.proxy,
@@ -200,14 +202,18 @@ class ProgetApi {
 
         _request = _request.defaults(this.defaultRequest || {});
 
-        _request(adr, (error, response, body) => {
+        _request.post(adr, (error, response, body) => {
+            const status = response.statusCode;
+
             if (error) {
                 reject(createError(`Request to ${url} failed: ${error.message}`, error.code));
             } else {
-                if (response.statusCode === 200) {
+                if (status === 200) {
                     resolve(body);
+                } else if (status >= 300 && status < 400) {
+                    this.communicate(url, response.headers.location.toString(), resolve, reject, params);
                 } else {
-                    reject(createError(`Request to ${url} returned ${response.statusCode} status code.`, "EREQUEST", {
+                    reject(createError(`Request to ${url} returned ${status} status code.`, "EREQUEST", {
                         details: `url: ${url}\nadr: ${adr}\n${JSON.stringify(response, null, 2)}`
                     }));
                 }
@@ -218,7 +224,8 @@ class ProgetApi {
     /**
      * Communicate with ProGet to get a feed ID from a name
      */
-    public findFeedId(url: string, resolve: Function, reject: Function, params: RequestParameters) {
+    public findFeedId(url: string, resolve: (data: string) => void, reject: (err: Error) => void,
+                      params: RequestParameters) {
         const reqID = `${url.split("/upack/")[0]}/api/json/Feeds_GetFeed`;
 
         this.communicate(url, reqID, resolve, reject, {Feed_Name: params.Feed_Id, API_Key: params.API_Key});
@@ -301,7 +308,7 @@ class ProgetApi {
     public getPackageVersions(pkg: string): Promise<any> {
         if (ProgetApi.isShortFormat(pkg)) {
             // We will scan all the sources that match the regex.
-            return new Promise((resolve: Function, reject: Function) => {
+            return new Promise((resolve: (data: ReleaseTags[]) => void, reject: (err: Error) => void) => {
                 const promises = [];
                 let out: ReleaseTags[] = [];
 
@@ -324,7 +331,7 @@ class ProgetApi {
             });
         } else if (this.fullUrlRegExp.test(pkg)) {
             // After match the only choice here is an already formatted ProGet Universal source
-            return new Promise((resolve: Function) => {
+            return new Promise((resolve: (data: ReleaseTags[]) => void) => {
                 const match = this.fullUrlRegExp.exec(pkg);
 
                 if (match.length === 4) {
@@ -338,7 +345,7 @@ class ProgetApi {
                 }
             });
         } else {
-            return new Promise((resolve: Function) => {
+            return new Promise((resolve: (data: ReleaseTags[]) => void) => {
                 resolve([]);
             });
         }
@@ -355,7 +362,7 @@ class ProgetApi {
      * Validate that the package can be treat by the resolver
      */
     public isMatching(pkg: string): Promise<any> {
-        return new Promise((resolve: Function, reject: Function) => {
+        return new Promise((resolve: (data: boolean) => void, reject: (err: Error) => void) => {
             if (this.isSupportedSource(pkg) || ProgetApi.isShortFormat(pkg)) {
                 this.getPackageVersions(pkg).then(
                     (data: ReleaseTags[]) => {

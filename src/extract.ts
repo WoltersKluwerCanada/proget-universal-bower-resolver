@@ -10,7 +10,7 @@ import ErrorN from "./ErrorN";
  * Extract the ZIP archive
  */
 const extract = (from: string, to: string, logger: BowerLogger): Promise<any> => {
-    return new Promise((resolve: Function, reject: Function) => {
+    return new Promise((resolve: () => void, reject: (error: ErrorN) => void) => {
         // Validate that the source as supported extension
         if (!(/.*\.upack$/.test(from))) {
             reject(createError(`File ${from} is not a known archive`, "ENOTARCHIVE"));
