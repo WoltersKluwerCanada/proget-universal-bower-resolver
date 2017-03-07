@@ -19,3 +19,7 @@ typings.json
 /node_modules/
 /typings/
 !/lib/
+/lib/test
+coverage
+.nyc_output
+yarn.lock
