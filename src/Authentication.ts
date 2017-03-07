@@ -30,7 +30,7 @@ export default class Authentication {
     private static convertNpmrcAuthToJson(npmrcContent: string): Map<string, AuthToken> {
         const out = new Map();
 
-        const foundUrlAuthInfo = /(.*):_password="(.+)"(?:\r|\n){1,2}.*username=([a-zA-Z.0-9]*)/g;
+        const foundUrlAuthInfo = /(.*):_password="(.+)"(?:\r|\n){1,2}.*username=(\S+)/g;
         let m = foundUrlAuthInfo.exec(npmrcContent);
 
         while (m !== null) {
@@ -72,7 +72,7 @@ export default class Authentication {
         return out;
     }
 
-    private possibleDirectories: string[] = [process.cwd()];
+    private possibleDirectories: string[] = [process.cwd(), os.homedir()];
     private passwordFile: string = ".npmrc";
     private cache: Map<string, AuthToken>;
 
@@ -107,11 +107,6 @@ export default class Authentication {
         for (const directory of this.possibleDirectories) {
             out.push(Authentication.convertNpmrcAuthToJson(this.readConfigFile(directory)));
         }
-
-        // Read the user config
-        out.push(Authentication.convertNpmrcAuthToJson(this.readConfigFile(os.homedir())));
-
-        // TODO In the future find a way to read the global config
 
         this.cache = Authentication.mergeConfig(out);
     }

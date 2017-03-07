@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.1 - 2017-03-07
+
+- Fix: Now we support user name with all "visible" character. (With the last version, a username with a `-` in it would have been truncated.)
+
 ## v0.5.0 - 2017-03-07
 
 - Add: Support for HTTP redirection.
