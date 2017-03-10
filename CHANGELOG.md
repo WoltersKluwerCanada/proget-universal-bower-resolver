@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.2 - 2017-03-10
+
+- Fix: Temp directory deletion.
+
 ## v0.5.1 - 2017-03-07
 
 - Fix: Now we support user name with all "visible" character. (With the last version, a username with a `-` in it would have been truncated.)

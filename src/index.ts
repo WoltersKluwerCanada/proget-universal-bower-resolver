@@ -1,5 +1,6 @@
 "use strict";
 /* tslint:disable:object-literal-sort-keys */
+import * as rimraf from "rimraf";
 import * as tmp from "tmp";
 import download from "./download";
 import extract from "./extract";
@@ -49,21 +50,30 @@ const resolver = (bower: Bower) => {
                     downloadUrl = `${src}/download/bower/${endpoint.source}/${version}`;
                 }
 
-                const downloadPath = tmp.dirSync({unsafeCleanup: true});
+                const downloadPath = tmp.dirSync({unsafeCleanup: true, prefix: `pubr-${endpoint.source}`});
 
                 return download(downloadUrl, downloadPath.name, bower).then((archivePatch) => {
-                    const extractPath = tmp.dirSync({unsafeCleanup: true, prefix: `${version}_${endpoint.name}_`});
+                    const extractPath = tmp.dirSync({unsafeCleanup: true, prefix: `pubr-${version}_${endpoint.name}_`});
 
                     return extract(archivePatch, extractPath.name, bower.logger).then(() => {
-                        downloadPath.removeCallback();
-
                         process.on("exit", () => {
-                            try {
-                                extractPath.removeCallback();
-                            }
-                            catch (e) {
-                                // This error can be ignored
-                            }
+                            rimraf(downloadPath.name, ()=> {
+                                rimraf(extractPath.name, ()=> {
+                                    try {
+                                        downloadPath.removeCallback();
+                                    }
+                                    catch (e) {
+                                        // This error can be ignored
+                                    } finally {
+                                        try {
+                                            extractPath.removeCallback();
+                                        }
+                                        catch (e) {
+                                            // This error can be ignored
+                                        }
+                                    }
+                                });
+                            });
                         });
 
                         return {
