@@ -57,8 +57,8 @@ const resolver = (bower: Bower) => {
 
                     return extract(archivePatch, extractPath.name, bower.logger).then(() => {
                         process.on("exit", () => {
-                            rimraf(downloadPath.name, ()=> {
-                                rimraf(extractPath.name, ()=> {
+                            rimraf(downloadPath.name, () => {
+                                rimraf(extractPath.name, () => {
                                     try {
                                         downloadPath.removeCallback();
                                     }
