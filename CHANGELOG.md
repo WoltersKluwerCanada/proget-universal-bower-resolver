@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.3 - 2017-04-19
+
+- Fix: Error when missing the `proget` field in `.bowerrc`s configuration files.
+- Add: Add debug message when the plugin is not use.
+- Internally: Some code cleaning.
+
 ## v0.5.2 - 2017-03-10
 
 - Fix: Temp directory deletion.

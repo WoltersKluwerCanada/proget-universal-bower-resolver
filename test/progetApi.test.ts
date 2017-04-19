@@ -192,49 +192,6 @@ describe("progetApi", function() {
         });
     });
 
-    // Test request use at step fetch
-    it("Feeds_GetFeed by number", function(done) {
-        this.api.getFeedDetails(`${share.testAddress}/upack/23`).then(
-            (rep) => {
-                try {
-                    const serverData = JSON.parse(share.expectedRequestAnswer.forFeedInfo1);
-                    expect(rep.description).equal(serverData.Feed_Description);
-                    expect(rep.name).equal(serverData.Feed_Name);
-                    expect(rep.id).equal(serverData.Feed_Id);
-                    expect(rep.type).equal(serverData.FeedType_Name);
-                    done();
-                } catch (e) {
-                    done(e);
-                }
-            },
-            (err) => {
-                done(err);
-            }
-        );
-    });
-
-    // Test request use at step fetch
-    it("Feeds_GetFeed by name", function(done) {
-        this.api.getFeedDetails(`${share.testAddress}/upack/wk-develop-bower`).then(
-            (rep) => {
-                const serverData = JSON.parse(share.expectedRequestAnswer.forFeedInfo2);
-
-                try {
-                    expect(rep.description).equal(serverData.Feed_Description);
-                    expect(rep.name).equal(serverData.Feed_Name);
-                    expect(rep.id).equal(serverData.Feed_Id);
-                    expect(rep.type).equal(serverData.FeedType_Name);
-                    done();
-                } catch (e) {
-                    done(e);
-                }
-            },
-            (err) => {
-                done(err);
-            }
-        );
-    });
-
     after(function(done) {
         server.stopServer(done);
     });
