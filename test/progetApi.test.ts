@@ -9,7 +9,8 @@ import * as share from "./data/share";
 describe("progetApi", function() {
     before(function(done) {
         server.startServer(done);
-        this.api = new ProgetAPI({
+        this.api = ProgetAPI.getInstance();
+        this.api.ini({
             config: share.bowerConfig,
             logger: {
                 action: () => {

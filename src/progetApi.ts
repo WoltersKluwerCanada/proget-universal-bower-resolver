@@ -71,7 +71,14 @@ class ProgetApi {
         return releases(tags(extractRefs(response)), repository);
     }
 
+    public static getInstance(): ProgetApi {
+        return ProgetApi._instance;
+    }
+
+    private static _instance: ProgetApi = new ProgetApi();
+
     public fullUrlRegExp: RegExp = /(.*\/upack\/[\w.-]*)\/download\/[\w.-]*\/([\w.-]*)\/([\w.]*)/;
+    public isInitialise: boolean;
     private httpProxy: string;
     private proxy: string;
     private ca: Buffer;
@@ -88,7 +95,20 @@ class ProgetApi {
     /**
      * Prepare for communicating with ProGet
      */
-    constructor(bower: Bower) {
+    constructor() {
+        if (ProgetApi._instance) {
+            throw new Error("Error: Instantiation failed: Use ProgetApi.getInstance() instead of new.");
+        }
+        this.isInitialise = false;
+        ProgetApi._instance = this;
+    }
+
+    public ini(bower: Bower): void {
+        // Ignore multiple configuration
+        if (this.isInitialise) {
+            return;
+        }
+
         this.httpProxy = bower.config.httpsProxy;
         this.proxy = bower.config.proxy;
         this.ca = bower.config.ca.search[0];
@@ -98,10 +118,11 @@ class ProgetApi {
         this.cachedPackages = {};
         this.logger = bower.logger;
         this.activatePlugin = !!bower.config.proget;
+        this.isInitialise = true;
 
         // If we have ProGet configuration found
         if (!bower.config.proget) {
-            this.logger.debug("pubr", "No ProGet configuration found, the plug-in will not be use.");
+            this.logger.warn("pubr", "No ProGet configuration found, the plug-in will not be use.");
             return;
         }
 

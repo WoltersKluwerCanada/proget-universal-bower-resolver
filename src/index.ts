@@ -13,7 +13,11 @@ tmp.setGracefulCleanup();
  * Main module section
  */
 const resolver = (bower: Bower) => {
-    const api = new ProgetAPI(bower);
+    const api = ProgetAPI.getInstance();
+
+    if (!api.isInitialise) {
+        api.ini(bower);
+    }
 
     return {
         /**
