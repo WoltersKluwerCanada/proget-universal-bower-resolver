@@ -1,11 +1,11 @@
 # Changelog
 
-## v0.5.3 - 2017-04-22
+## v0.5.3 - 2017-05-07
 
 - Fix: Error when missing the `proget` field in `.bowerrc`s configuration files.
 - Add: Add warning message when the plugin is not use.
 - Internally: Some code cleaning.
-- Internally: Now the ProgetAPI class is a singleton.
+- Internally: Now the ProGetAPI class is a singleton.
 
 ## v0.5.2 - 2017-03-10
 
