@@ -71,7 +71,14 @@ class ProgetApi {
         return releases(tags(extractRefs(response)), repository);
     }
 
+    public static getInstance(): ProgetApi {
+        return ProgetApi._instance;
+    }
+
+    private static _instance: ProgetApi = new ProgetApi();
+
     public fullUrlRegExp: RegExp = /(.*\/upack\/[\w.-]*)\/download\/[\w.-]*\/([\w.-]*)\/([\w.]*)/;
+    public isInitialise: boolean;
     private httpProxy: string;
     private proxy: string;
     private ca: Buffer;
@@ -80,6 +87,7 @@ class ProgetApi {
     private defaultRequest: string;
     private cachedPackages: object;
     private logger: BowerLogger;
+    private activatePlugin: boolean;
     private conf: ProGetApiConf[];
     private registries: string[] = [];
     private cache: ProGetCache = {};
@@ -87,7 +95,20 @@ class ProgetApi {
     /**
      * Prepare for communicating with ProGet
      */
-    constructor(bower: Bower) {
+    constructor() {
+        if (ProgetApi._instance) {
+            throw new Error("Error: Instantiation failed: Use ProgetApi.getInstance() instead of new.");
+        }
+        this.isInitialise = false;
+        ProgetApi._instance = this;
+    }
+
+    public ini(bower: Bower): void {
+        // Ignore multiple configuration
+        if (this.isInitialise) {
+            return;
+        }
+
         this.httpProxy = bower.config.httpsProxy;
         this.proxy = bower.config.proxy;
         this.ca = bower.config.ca.search[0];
@@ -96,6 +117,14 @@ class ProgetApi {
         this.defaultRequest = bower.config.request;
         this.cachedPackages = {};
         this.logger = bower.logger;
+        this.activatePlugin = !!bower.config.proget;
+        this.isInitialise = true;
+
+        // If we have ProGet configuration found
+        if (!bower.config.proget) {
+            this.logger.warn("pubr", "No ProGet configuration found, the plug-in will not be use.");
+            return;
+        }
 
         // Validate the parameters in the configuration file and emit deprecation warnings
         this.checkForOldConfig(bower.config);
@@ -141,9 +170,55 @@ class ProgetApi {
     }
 
     /**
+     * Read the cache and return the available version(s) for the package
+     */
+    public readCache(pkg: string): ReleaseTags[] {
+        return this.cache[pkg];
+    }
+
+    /**
+     * Validate that the package can be treat by the resolver
+     */
+    public isMatching(pkg: string): Promise<any> {
+        return new Promise((resolve: (data: boolean) => void, reject: (err: Error) => void) => {
+            if (!this.activatePlugin) {
+                resolve(false);
+                return;
+            }
+
+            if (this.isSupportedSource(pkg) || ProgetApi.isShortFormat(pkg)) {
+                this.getPackageVersions(pkg).then(
+                    (data: ReleaseTags[]) => {
+                        if (data.length > 0) {
+                            this.cache[pkg] = data;
+
+                            this.logger.debug(
+                                "pubr - match", `The resolver pubr found ${data.length} versions of the package ${pkg}.`
+                            );
+
+                            resolve(true);
+                        } else {
+                            this.logger.debug(
+                                "pubr - match", `The resolver pubr don't found the package ${pkg}.`
+                            );
+
+                            resolve(false);
+                        }
+                    },
+                    (err) => {
+                        reject(err);
+                    }
+                );
+            } else {
+                resolve(false);
+            }
+        });
+    }
+
+    /**
      * Throw warnings if old configuration parameters still in the .bowerrc file
      */
-    public checkForOldConfig(conf: BowerConfig) {
+    private checkForOldConfig(conf: BowerConfig) {
         const warn = (parameter) => {
             this.logger.warn(
                 "pubr - conf",
@@ -175,7 +250,7 @@ class ProgetApi {
     /**
      * Check if the source url has an API key in configuration
      */
-    public isSupportedSource(source: string): boolean {
+    private isSupportedSource(source: string): boolean {
         // Check if formatted in our config style
         for (const conf of this.conf) {
             if (conf._serverRegExp.test(source)) {
@@ -189,8 +264,8 @@ class ProgetApi {
     /**
      * ProGet communication method
      */
-    public communicate(url: string, adr: string, resolve: (data: string) => void, reject: (err: Error) => void,
-                       params: RequestParameters) {
+    private communicate(url: string, adr: string, resolve: (data: string) => void, reject: (err: Error) => void,
+                        params: RequestParameters) {
         // TODO use retry here too
         let _request = request.defaults({
             ca: this.ca,
@@ -224,8 +299,8 @@ class ProgetApi {
     /**
      * Communicate with ProGet to get a feed ID from a name
      */
-    public findFeedId(url: string, resolve: (data: string) => void, reject: (err: Error) => void,
-                      params: RequestParameters) {
+    private findFeedId(url: string, resolve: (data: string) => void, reject: (err: Error) => void,
+                       params: RequestParameters) {
         const reqID = `${url.split("/upack/")[0]}/api/json/Feeds_GetFeed`;
 
         this.communicate(url, reqID, resolve, reject, {Feed_Name: params.Feed_Id, API_Key: params.API_Key});
@@ -234,7 +309,7 @@ class ProgetApi {
     /**
      * Send request to ProGet
      */
-    public sendRequest(source: string, pkg: string, apiMethod: string): Promise<any> {
+    private sendRequest(source: string, pkg: string, apiMethod: string): Promise<any> {
         return new Promise((resolve, reject) => {
             const rUrl = source.split("/upack/");
             const adr = `${rUrl[0]}/api/json/${apiMethod}`;
@@ -282,30 +357,9 @@ class ProgetApi {
     }
 
     /**
-     * Acquire information from ProGet about a Feed
-     */
-    public getFeedDetails(source: string): Promise<any> {
-        return this.sendRequest(source, null, "Feeds_GetFeed").then(
-            (detailsJson: string) => {
-                if (detailsJson) {
-                    const details = JSON.parse(detailsJson);
-                    return {
-                        description: details.Feed_Description,
-                        id: details.Feed_Id,
-                        name: details.Feed_Name,
-                        type: details.FeedType_Name,
-                    };
-                } else {
-                    return null;
-                }
-            }
-        );
-    }
-
-    /**
      * Return the versions of a package from a source
      */
-    public getPackageVersions(pkg: string): Promise<any> {
+    private getPackageVersions(pkg: string): Promise<any> {
         if (ProgetApi.isShortFormat(pkg)) {
             // We will scan all the sources that match the regex.
             return new Promise((resolve: (data: ReleaseTags[]) => void, reject: (err: Error) => void) => {
@@ -349,47 +403,6 @@ class ProgetApi {
                 resolve([]);
             });
         }
-    }
-
-    /**
-     * Read the cache and return the available version(s) for the package
-     */
-    public readCache(pkg: string): ReleaseTags[] {
-        return this.cache[pkg];
-    }
-
-    /**
-     * Validate that the package can be treat by the resolver
-     */
-    public isMatching(pkg: string): Promise<any> {
-        return new Promise((resolve: (data: boolean) => void, reject: (err: Error) => void) => {
-            if (this.isSupportedSource(pkg) || ProgetApi.isShortFormat(pkg)) {
-                this.getPackageVersions(pkg).then(
-                    (data: ReleaseTags[]) => {
-                        if (data.length > 0) {
-                            this.cache[pkg] = data;
-
-                            this.logger.debug(
-                                "pubr - match", `The resolver pubr found ${data.length} versions of the package ${pkg}.`
-                            );
-
-                            resolve(true);
-                        } else {
-                            this.logger.debug(
-                                "pubr - match", `The resolver pubr don't found the package ${pkg}.`
-                            );
-
-                            resolve(false);
-                        }
-                    },
-                    (err) => {
-                        reject(err);
-                    }
-                );
-            } else {
-                resolve(false);
-            }
-        });
     }
 }
 
