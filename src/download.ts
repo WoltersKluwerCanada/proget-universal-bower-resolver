@@ -59,13 +59,12 @@ const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestI
     }
 
     // Prepare the retry module
-    const retryOptions = Object.assign({
+    const retryOptions = {
         factor: 2,
         maxTimeout: 20000,
         minTimeout: 1000,
         randomize: true,
-        retries: 4
-    }, config.retry || {});
+        retries: 4, ...(config.retry || {})};
 
     // Retry on network errors
     const operation = retry.operation(retryOptions);

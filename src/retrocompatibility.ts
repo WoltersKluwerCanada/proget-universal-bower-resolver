@@ -100,7 +100,16 @@ export default class RetroCompatibility {
         // Parse the server config
         const proGetConf = config.proget.apiKeyMapping;
         for (const pci of this.proGetConfig.apiKeyMapping) {
-            if (this.serverNames.indexOf(pci.server) !== -1) {
+            // Validate that we don't duplicate the key
+            const found = proGetConf.findIndex((el) => {
+                return el.key === pci.key;
+            });
+
+            // If we have duplicate key, replace with the new one
+            if (found !== -1) {
+                proGetConf[found] = pci;
+            } else if (this.serverNames.indexOf(pci.server) !== -1) {
+                // Not found and in list of server
                 this.serverNames.push(pci.server);
                 proGetConf.push(pci);
             }

@@ -73,7 +73,7 @@ export default class Authentication {
     }
 
     private possibleDirectories: string[] = [process.cwd(), os.homedir()];
-    private passwordFile: string = ".npmrc";
+    private passwordFile = ".npmrc";
     private cache: Map<string, AuthToken>;
 
     public getCredentialsByURI(uri: string): AuthToken | null {

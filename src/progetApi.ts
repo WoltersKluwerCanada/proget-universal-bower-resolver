@@ -9,12 +9,12 @@ import RetroCompatibility from "./retrocompatibility";
 /**
  * Format a list of tags to be consume by Bower
  */
-function releases(tags: string[], repository: string): ReleaseTags[] {
-    if (!tags.length) {
+function releases(tagsArray: string[], repository: string): ReleaseTags[] {
+    if (!tagsArray.length) {
         return [];
     }
 
-    return tags.map((tag) => {
+    return tagsArray.map((tag) => {
         return {
             target: `${repository}#${tag}`,
             version: tag
@@ -82,7 +82,7 @@ class ProgetApi {
     private httpProxy: string;
     private proxy: string;
     private ca: Buffer;
-    private strictSSL: boolean = true;
+    private strictSSL = true;
     private timeout: number;
     private defaultRequest: string;
     private cachedPackages: object;

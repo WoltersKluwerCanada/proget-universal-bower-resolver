@@ -1,7 +1,11 @@
 {
-  "extends": "tslint:latest",
+  "extends": "tslint:recommended",
   "jsRules": {
     "class-name": true,
+    "max-line-length": [
+      true,
+      140
+    ],
     "comment-format": [
       true,
       "check-space"
@@ -14,6 +18,13 @@
     "no-eval": true,
     "no-trailing-whitespace": true,
     "no-unsafe-finally": true,
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "never",
+        "singleline": "never"
+      }
+    ],
     "one-line": [
       true,
       "check-open-brace",
@@ -46,6 +57,10 @@
   },
   "rules": {
     "class-name": true,
+    "max-line-length": [
+      true,
+      140
+    ],
     "comment-format": [
       true,
       "check-space"
@@ -57,7 +72,13 @@
     "no-eval": true,
     "no-internal-module": true,
     "no-trailing-whitespace": true,
-    "trailing-comma": false,
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "never",
+        "singleline": "never"
+      }
+    ],
     "no-unsafe-finally": true,
     "no-var-keyword": true,
     "one-line": [

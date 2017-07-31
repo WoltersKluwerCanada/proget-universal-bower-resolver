@@ -1,5 +1,7 @@
 "use strict";
 
+/* tslint:disable:only-arrow-functions no-unused-expression */
+
 import {expect} from "chai";
 import RetroCompatibility from "../src/retrocompatibility";
 
@@ -255,7 +257,7 @@ describe("RetroCompatibility", function() {
                     registries: [
                         "https://the.website2.com/upack/feedName2"
                     ],
-                    server: "https://the.website1.com",
+                    server: "https://the.website1.com"
 
                 },
                 registry: {
@@ -317,7 +319,7 @@ describe("RetroCompatibility", function() {
                     ],
                     feed: "feedName1",
                     group: "bower",
-                    server: "https://the.website1.com",
+                    server: "https://the.website1.com"
                 },
                 registry: {
                     search: [
@@ -367,7 +369,7 @@ describe("RetroCompatibility", function() {
                     ],
                     feed: "feedName1",
                     group: "bower",
-                    server: "https://the.website1.com",
+                    server: "https://the.website1.com"
                 },
                 registry: {
                     search: [
@@ -695,12 +697,6 @@ describe("RetroCompatibility", function() {
             const expectedOutput = {
                 proget: {
                     apiKeyMapping: [
-                        {
-                            _serverRegExp: new RegExp("https:\\\\/\\\\/the\\.website1\\.com"),
-                            key: "123456789",
-                            server: "https:\\\\/\\\\/the\\.website1\\.com"
-                        },
-                        // TODO validate in future if this can cause problem (multiple time the same server)
                         {
                             key: "123456789",
                             server: "https://the.website1.com"

@@ -1,5 +1,7 @@
 "use strict";
 
+/* tslint:disable:only-arrow-functions no-unused-expression */
+
 import {expect} from "chai";
 import Index from "../src/index";
 import * as server from "./data/fake/fakeHtttpServer";
@@ -153,7 +155,7 @@ describe("index", function() {
             const res = index.fetch(endpoint, cached);
 
             // If the method is ignore, it return undefined
-            expect(res).eql({});
+            expect(res).to.be.empty;
         });
     });
 
