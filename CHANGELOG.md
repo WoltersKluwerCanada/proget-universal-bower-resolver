@@ -2,6 +2,7 @@
 
 ## v0.5.4 - 2017-07-31
 
+- Fix: In certain case, an API key can be duplicate in memory after retro compatibility parsing and cause unwanted result.
 - Internally: Update TsLint version.
 - Internally: Change the way TypeScript build.
 - Internally: Make changes for NPM v5.
