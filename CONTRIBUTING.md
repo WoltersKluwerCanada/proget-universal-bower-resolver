@@ -1,35 +1,23 @@
 # Contributing
 
-## Scripts
-
-From the project root folder:
-
-### Code quality
+## Run tests
 ```
-# For the main code
+# unit
+npm run test:unit
+#all
+npm run test
+```
+
+## Run code quality test
+```
 npm run lint
-# For the test code
-npm run lintTest
+# and/or
+npm run lint:Tests
+# and/or
+npm run lint:Fix
 ```
 
-### Generate documentation
-```
-npm run jsDoc
-```
-
-### Generate coverage
+## Run code coverage report
 ```
 npm run coverage
-```
-The test result will after be available in the folder `.testResult/coverage/lcov-report/index.html`.
-
-### Unit test
-```
-npm run unit
-```
-
-
-### Run lint, unit and coverage
-```
-npm run test
 ```
