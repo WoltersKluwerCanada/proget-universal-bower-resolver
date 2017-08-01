@@ -12,8 +12,6 @@ npm run test
 ```
 npm run lint
 # and/or
-npm run lint:Tests
-# and/or
 npm run lint:Fix
 ```
 

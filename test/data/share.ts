@@ -8,12 +8,6 @@ import * as rimraf from "rimraf";
 const testPort = "8080";
 const testApiKey = "testP4ssw0rd";
 
-/**
- * Create a temp folder
- *
- * @param {string} path - Path to the temp package
- * @param {function} callback - The method to call after the execution
- */
 const createTestFolder = (dest, callback) => {
     fs.stat(dest, (err) => {
         if (err && err.code === "ENOENT") {
@@ -38,14 +32,8 @@ const createTestFolder = (dest, callback) => {
     });
 };
 
-/**
- * Delete a temp folder
- *
- * @param {string} path - PPath to the temp package
- * @param {function} callback - The method to call after the execution
- */
-const deleteTestFolder = (path, callback) => {
-    rimraf(path, (err) => {
+const deleteTestFolder = (pathToFolder, callback) => {
+    rimraf(pathToFolder, (err) => {
         if (err) {
             callback(err);
         } else {

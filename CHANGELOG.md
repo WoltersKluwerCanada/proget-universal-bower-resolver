@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5.4 - 2017-07-31
+
+- Fix: In certain case, an API key can be duplicate in memory after retro compatibility parsing and cause unwanted result.
+- Internally: Update TsLint version.
+- Internally: Change the way TypeScript build.
+- Internally: Make changes for NPM v5.
+- Internally: Make changes for new TypeScript, Mocha and TsLint version.
+- Internally: Add Node.js v8 as test environment.
+
 ## v0.5.3 - 2017-05-07
 
 - Fix: Error when missing the `proget` field in `.bowerrc`s configuration files.

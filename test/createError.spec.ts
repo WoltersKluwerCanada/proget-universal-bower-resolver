@@ -1,5 +1,7 @@
 "use strict";
 
+/* tslint:disable:only-arrow-functions no-unused-expression */
+
 import {expect} from "chai";
 import createError from "../src/createError";
 
@@ -9,7 +11,7 @@ describe("createError", function() {
     it("basic information", function() {
         const err = createError("Some test text!", "ETEST");
 
-        expect(err).eql({code: "ETEST"});
+        expect(err.code).equal("ETEST");
         expect(err).a("Error");
     });
 
@@ -19,10 +21,8 @@ describe("createError", function() {
             details: "Some test details."
         });
 
-        expect(err).eql({
-            code: "ETEST",
-            details: "Some test details."
-        });
+        expect(err.code).equal("ETEST");
+        expect(err.details).equal("Some test details.");
         expect(err).a("Error");
     });
 });

@@ -1,5 +1,7 @@
 "use strict";
 
+/* tslint:disable:only-arrow-functions no-unused-expression */
+
 import {expect} from "chai";
 import ProgetAPI from "../src/progetApi";
 import * as server from "./data/fake/fakeHtttpServer";
@@ -129,22 +131,24 @@ describe("progetApi", function() {
                 (rep) => {
                     try {
                         expect(rep.length).equal(4);
-                        expect(rep).to.contain({
-                            target: "http://localhost:8080/upack/42#1.1.1",
-                            version: "1.1.1"
-                        });
-                        expect(rep).to.contain({
-                            target: "http://localhost:8080/upack/42#3.3.3",
-                            version: "3.3.3"
-                        });
-                        expect(rep).to.contain({
-                            target: "http://localhost:8080/upack/23#1.1.1",
-                            version: "1.1.1"
-                        });
-                        expect(rep).to.contain({
-                            target: "http://localhost:8080/upack/23#2.2.2",
-                            version: "2.2.2"
-                        });
+                        expect(rep).to.deep.include.members([
+                            {
+                                target: "http://localhost:8080/upack/42#1.1.1",
+                                version: "1.1.1"
+                            },
+                            {
+                                target: "http://localhost:8080/upack/42#3.3.3",
+                                version: "3.3.3"
+                            },
+                            {
+                                target: "http://localhost:8080/upack/23#1.1.1",
+                                version: "1.1.1"
+                            },
+                            {
+                                target: "http://localhost:8080/upack/23#2.2.2",
+                                version: "2.2.2"
+                            }
+                        ]);
                         done();
                     } catch (e) {
                         done(e);
@@ -161,7 +165,8 @@ describe("progetApi", function() {
                 (rep) => {
                     try {
                         expect(rep.length).equal(1);
-                        expect(rep).to.contain({
+
+                        expect(rep).to.deep.include({
                             target: "http://localhost:8080/upack/42#1.1.1",
                             version: "1.1.1"
                         });
