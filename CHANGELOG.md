@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.5.4 - 2017-07-31
+## v0.5.4 - 2017-08-02
 
 - Fix: In certain case, an API key can be duplicate in memory after retro compatibility parsing and cause unwanted result.
 - Internally: Update TsLint version.
