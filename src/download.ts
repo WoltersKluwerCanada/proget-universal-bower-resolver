@@ -31,7 +31,7 @@ const authenticationProvider = (auth: boolean, requestUrl: string): ErrorN | {} 
 /**
  * Download request
  */
-const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestInstance, auth: boolean,
+const downloadRunner = (file: string, bower: IBower, requestUrl: string, requestInstance, auth: boolean,
                         cb: (err: Error, data: string) => void): void => {
     const config = bower.config;
     const retryCommunication = (req, writeStream) => {
@@ -47,7 +47,7 @@ const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestI
     const credential = authenticationProvider(auth, requestUrl);
 
     if (credential instanceof ErrorN) {
-        // If no config for a feed is found, send an error to Bower
+        // If no config for a feed is found, send an error to IBower
         bower.logger.error(
             "pubr - auth",
             `No authentication set in .npmrc for: ${Authentication.nerf(requestUrl)}`,
@@ -64,7 +64,8 @@ const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestI
         maxTimeout: 20000,
         minTimeout: 1000,
         randomize: true,
-        retries: 4, ...(config.retry || {})};
+        retries: config.retry || 4
+    };
 
     // Retry on network errors
     const operation = retry.operation(retryOptions);
@@ -180,22 +181,20 @@ const downloadRunner = (file: string, bower: Bower, requestUrl: string, requestI
 /**
  * Download the package from the server
  */
-const download = (requestUrl: string, downloadPath: string, bower: Bower): Promise<any> => {
+const download = (requestUrl: string, downloadPath: string, bower: IBower): Promise<any> => {
     const config = bower.config;
     const parsedUrl = url.parse(requestUrl);
     const file = tmp.tmpNameSync({dir: downloadPath, postfix: ".upack"});
 
     return new Promise((resolve, reject) => {
         // Prepare the request
-        let _request = request.defaults({
+        const _request = request.defaults({
             ca: config.ca.search[0],
             followRedirect: false,
             proxy: parsedUrl.protocol === "https:" ? config.httpsProxy : config.proxy,
             strictSSL: config.strictSsl,
             timeout: config.timeout
         });
-
-        _request = _request.defaults(config.request || {});
 
         downloadRunner(file, bower, requestUrl, _request, false, (err, fileName) => {
             if (err) {

@@ -12,7 +12,7 @@ tmp.setGracefulCleanup();
 /**
  * Main module section
  */
-const resolver = (bower: Bower) => {
+const resolver = (bower: IBower) => {
     const api = ProgetAPI.getInstance();
 
     if (!api.isInitialise) {
@@ -21,23 +21,23 @@ const resolver = (bower: Bower) => {
 
     return {
         /**
-         * Tells Bower whether to use or not use this resolver for some source.
+         * Tells IBower whether to use or not use this resolver for some source.
          */
         match: (source: string): Promise<any> => {
             return api.isMatching(source);
         },
 
         /**
-         * Bower selects one matching version from the result and passes matching target field to fetch method.
+         * IBower selects one matching version from the result and passes matching target field to fetch method.
          */
-        releases: (source: string): ReleaseTags[] => {
+        releases: (source: string): IReleaseTags[] => {
             return api.readCache(source);
         },
 
         /**
          * Downloads given endpoint and returns path to temporary directory
          */
-        fetch: (endpoint: BowerPackageEndpoint, cached: BowerPackageCached) => {
+        fetch: (endpoint: IBowerPackageEndpoint, cached: IBowerPackageCached) => {
             // TODO Bring back this line once Node 6 is the oldest supported Node version
             // let [src, version] = endpoint.target.split("#");
             const part = endpoint.target.split("#");

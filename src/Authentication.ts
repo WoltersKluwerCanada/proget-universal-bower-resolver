@@ -27,10 +27,10 @@ export default class Authentication {
         return url.resolve(url.format(parsed).replace(/(upack|bower).*/, "npm/"), ".");
     }
 
-    private static convertNpmrcAuthToJson(npmrcContent: string): Map<string, AuthToken> {
+    private static convertNpmrcAuthToJson(npmrcContent: string): Map<string, IAuthToken> {
         const out = new Map();
 
-        const foundUrlAuthInfo = /(.*):_password="(.+)"(?:\r|\n){1,2}.*username=(\S+)/g;
+        const foundUrlAuthInfo = /(.*):_password="(.+)"[\r\n]{1,2}.*username=(\S+)/g;
         let m = foundUrlAuthInfo.exec(npmrcContent);
 
         while (m !== null) {
@@ -40,7 +40,7 @@ export default class Authentication {
             }
 
             if (m.length === 4 && m[1].length > 0 && m[2].length > 0 && m[3].length > 0) {
-                out[m[1]] = {password: new Buffer(m[2], "base64").toString(), username: m[3]};
+                out[m[1]] = {password: Buffer.from(m[2], "base64").toString(), username: m[3]};
             }
 
             m = foundUrlAuthInfo.exec(npmrcContent);
@@ -49,7 +49,7 @@ export default class Authentication {
         return out;
     }
 
-    private static mergeConfig(configs: Array<Map<string, AuthToken>>): Map<string, AuthToken> {
+    private static mergeConfig(configs: Array<Map<string, IAuthToken>>): Map<string, IAuthToken> {
         let out = new Map();
 
         if (configs.length !== 0) {
@@ -74,9 +74,9 @@ export default class Authentication {
 
     private possibleDirectories: string[] = [process.cwd(), os.homedir()];
     private passwordFile = ".npmrc";
-    private cache: Map<string, AuthToken>;
+    private cache: Map<string, IAuthToken>;
 
-    public getCredentialsByURI(uri: string): AuthToken | null {
+    public getCredentialsByURI(uri: string): IAuthToken | null {
         const nerfed = Authentication.nerf(uri);
 
         // Look in cache first
@@ -100,7 +100,7 @@ export default class Authentication {
     }
 
     private setCache(): void {
-        const out: Array<Map<string, AuthToken>> = [];
+        const out: Array<Map<string, IAuthToken>> = [];
 
         out.push(this.cache);
 

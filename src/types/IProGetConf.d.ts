@@ -1,5 +1,5 @@
-declare interface ProGetConf {
-    apiKeyMapping: ProGetApiConf[];
+declare interface IProGetConf {
+    apiKeyMapping: IProGetApiConf[];
     // Deprecated options
     server?: string;
     feed?: string;
@@ -8,7 +8,7 @@ declare interface ProGetConf {
     registries?: string[];
 }
 
-declare interface ProGetApiConf {
+declare interface IProGetApiConf {
     server: string;
     _serverRegExp?: RegExp;
     key: string;

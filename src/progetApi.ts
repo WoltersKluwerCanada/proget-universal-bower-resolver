@@ -7,9 +7,9 @@ import createError from "./createError";
 import RetroCompatibility from "./retrocompatibility";
 
 /**
- * Format a list of tags to be consume by Bower
+ * Format a list of tags to be consume by IBower
  */
-function releases(tagsArray: string[], repository: string): ReleaseTags[] {
+function releases(tagsArray: string[], repository: string): IReleaseTags[] {
     if (!tagsArray.length) {
         return [];
     }
@@ -67,7 +67,7 @@ class ProgetApi {
     /**
      * Parse the server response into bower understandable format when asking for package available version(s)
      */
-    public static extractReleases(response: string, repository: string): ReleaseTags[] {
+    public static extractReleases(response: string, repository: string): IReleaseTags[] {
         return releases(tags(extractRefs(response)), repository);
     }
 
@@ -86,11 +86,11 @@ class ProgetApi {
     private timeout: number;
     private defaultRequest: string;
     private cachedPackages: object;
-    private logger: BowerLogger;
+    private logger: IBowerLogger;
     private activatePlugin: boolean;
-    private conf: ProGetApiConf[];
+    private conf: IProGetApiConf[];
     private registries: string[] = [];
-    private cache: ProGetCache = {};
+    private cache: IProGetCache = {};
 
     /**
      * Prepare for communicating with ProGet
@@ -103,7 +103,7 @@ class ProgetApi {
         ProgetApi._instance = this;
     }
 
-    public ini(bower: Bower): void {
+    public ini(bower: IBower): void {
         // Ignore multiple configuration
         if (this.isInitialise) {
             return;
@@ -135,7 +135,7 @@ class ProgetApi {
         // Set config
         if (!bower.config.proget.hasOwnProperty("apiKeyMapping")) {
             throw createError(
-                "Missing entries in the 'apiKeyMapping' parameter in 'proget' group of Bower configuration.",
+                "Missing entries in the 'apiKeyMapping' parameter in 'proget' group of IBower configuration.",
                 "EBOWERC"
             );
         } else {
@@ -155,7 +155,7 @@ class ProgetApi {
         // Set registries
         if (bower.config.registry.search.length === 0) {
             throw createError(
-                "Missing entries in the 'registries' parameter in 'proget' group of Bower configuration.",
+                "Missing entries in the 'registries' parameter in 'proget' group of IBower configuration.",
                 "EBOWERC"
             );
         } else {
@@ -172,7 +172,7 @@ class ProgetApi {
     /**
      * Read the cache and return the available version(s) for the package
      */
-    public readCache(pkg: string): ReleaseTags[] {
+    public readCache(pkg: string): IReleaseTags[] {
         return this.cache[pkg];
     }
 
@@ -188,7 +188,7 @@ class ProgetApi {
 
             if (this.isSupportedSource(pkg) || ProgetApi.isShortFormat(pkg)) {
                 this.getPackageVersions(pkg).then(
-                    (data: ReleaseTags[]) => {
+                    (data: IReleaseTags[]) => {
                         if (data.length > 0) {
                             this.cache[pkg] = data;
 
@@ -218,7 +218,7 @@ class ProgetApi {
     /**
      * Throw warnings if old configuration parameters still in the .bowerrc file
      */
-    private checkForOldConfig(conf: BowerConfig) {
+    private checkForOldConfig(conf: IBowerConfig) {
         const warn = (parameter) => {
             this.logger.warn(
                 "pubr - conf",
@@ -265,17 +265,15 @@ class ProgetApi {
      * ProGet communication method
      */
     private communicate(url: string, adr: string, resolve: (data: string) => void, reject: (err: Error) => void,
-                        params: RequestParameters) {
+                        params: IRequestParameters) {
         // TODO use retry here too
-        let _request = request.defaults({
+        const _request = request.defaults({
             ca: this.ca,
             proxy: Url.parse(url).protocol === "https:" ? this.httpProxy : this.proxy,
             qs: params,
             strictSSL: this.strictSSL,
             timeout: this.timeout
         });
-
-        _request = _request.defaults(this.defaultRequest || {});
 
         _request.post(adr, (error, response, body) => {
             const status = response.statusCode;
@@ -300,7 +298,7 @@ class ProgetApi {
      * Communicate with ProGet to get a feed ID from a name
      */
     private findFeedId(url: string, resolve: (data: string) => void, reject: (err: Error) => void,
-                       params: RequestParameters) {
+                       params: IRequestParameters) {
         const reqID = `${url.split("/upack/")[0]}/api/json/Feeds_GetFeed`;
 
         this.communicate(url, reqID, resolve, reject, {Feed_Name: params.Feed_Id, API_Key: params.API_Key});
@@ -362,9 +360,9 @@ class ProgetApi {
     private getPackageVersions(pkg: string): Promise<any> {
         if (ProgetApi.isShortFormat(pkg)) {
             // We will scan all the sources that match the regex.
-            return new Promise((resolve: (data: ReleaseTags[]) => void, reject: (err: Error) => void) => {
+            return new Promise((resolve: (data: IReleaseTags[]) => void, reject: (err: Error) => void) => {
                 const promises = [];
-                let out: ReleaseTags[] = [];
+                let out: IReleaseTags[] = [];
 
                 for (const registry of this.registries) {
                     promises.push(this.sendRequest(registry, pkg, "ProGetPackages_GetPackageVersions")
@@ -385,7 +383,7 @@ class ProgetApi {
             });
         } else if (this.fullUrlRegExp.test(pkg)) {
             // After match the only choice here is an already formatted ProGet Universal source
-            return new Promise((resolve: (data: ReleaseTags[]) => void) => {
+            return new Promise((resolve: (data: IReleaseTags[]) => void) => {
                 const match = this.fullUrlRegExp.exec(pkg);
 
                 if (match.length === 4) {
@@ -399,7 +397,7 @@ class ProgetApi {
                 }
             });
         } else {
-            return new Promise((resolve: (data: ReleaseTags[]) => void) => {
+            return new Promise((resolve: (data: IReleaseTags[]) => void) => {
                 resolve([]);
             });
         }

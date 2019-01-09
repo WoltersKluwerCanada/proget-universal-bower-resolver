@@ -1,7 +1,7 @@
 "use strict";
 
 export default class RetroCompatibility {
-    public static parse(config: BowerConfig): void {
+    public static parse(config: IBowerConfig): void {
         const tc = new RetroCompatibility(config);
     }
 
@@ -14,12 +14,12 @@ export default class RetroCompatibility {
     }
 
     private sources: string[] = [];
-    private proGetConfig: ProGetConf = {
+    private proGetConfig: IProGetConf = {
         apiKeyMapping: []
     };
     private serverNames: string[] = [];
 
-    private constructor(config: BowerConfig) {
+    private constructor(config: IBowerConfig) {
         if (config.hasOwnProperty("proget")) {
             this.readFrom01(config);
             this.readFrom02(config);
@@ -28,7 +28,7 @@ export default class RetroCompatibility {
         }
     }
 
-    private readFrom01(config: BowerConfig): void {
+    private readFrom01(config: IBowerConfig): void {
         // Add source
         if (config.proget.hasOwnProperty("server") && config.proget.hasOwnProperty("feed")) {
             const s = `${config.proget.server.replace(/\/$/, "")}/upack/${config.proget.feed}`;
@@ -48,7 +48,7 @@ export default class RetroCompatibility {
         RetroCompatibility._deleteNoMoreUseProperties(["apiKey", "server", "feed", "group"], config);
     }
 
-    private readFrom02(config: BowerConfig): void {
+    private readFrom02(config: IBowerConfig): void {
         // Add source
         if (config.proget.hasOwnProperty("apiKeyMapping") && config.proget.hasOwnProperty("registries")) {
             for (const source of config.proget.registries) {
@@ -59,8 +59,8 @@ export default class RetroCompatibility {
         RetroCompatibility._deleteNoMoreUseProperties(["registries"], config);
     }
 
-    private readFrom03(config: BowerConfig): void {
-        let proGetApiConf: ProGetApiConf;
+    private readFrom03(config: IBowerConfig): void {
+        let proGetApiConf: IProGetApiConf;
         const reg = /((\\.)|(\\\\)|(\.[*+?]))+/;
 
         if (config.proget.hasOwnProperty("apiKeyMapping")
@@ -84,7 +84,7 @@ export default class RetroCompatibility {
         }
     }
 
-    private merge(config: BowerConfig): void {
+    private merge(config: IBowerConfig): void {
         if (!config.proget.hasOwnProperty("apiKeyMapping")) {
             config.proget.apiKeyMapping = [];
         }

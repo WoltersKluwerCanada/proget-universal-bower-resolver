@@ -42,7 +42,7 @@ const deleteTestFolder = (pathToFolder, callback) => {
     });
 };
 
-const bowerConfig: BowerConfig = {
+const bowerConfig: IBowerConfig = {
     ca: {search: []},
     color: true,
     directory: "bower_components",
@@ -137,7 +137,7 @@ const expectedRequestAnswer = {
     }])
 };
 
-const bowerLogger: BowerLogger = {
+const bowerLogger: IBowerLogger = {
     action: () => {
         // No need to run anything here
     },

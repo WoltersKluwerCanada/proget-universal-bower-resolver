@@ -9,7 +9,7 @@ import ErrorN from "./ErrorN";
 /**
  * Extract the ZIP archive
  */
-const extract = (from: string, to: string, logger: BowerLogger): Promise<any> => {
+const extract = (from: string, to: string, logger: IBowerLogger): Promise<any> => {
     return new Promise((resolve: () => void, reject: (error: ErrorN) => void) => {
         // Validate that the source as supported extension
         if (!(/.*\.upack$/.test(from))) {

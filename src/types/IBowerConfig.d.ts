@@ -1,4 +1,4 @@
-declare interface BowerConfig {
+declare interface IBowerConfig {
     httpsProxy?: string;
     proxy?: string;
     ca?: any;
@@ -8,13 +8,13 @@ declare interface BowerConfig {
     strictSsl?: boolean;
     timeout?: number;
     request?: string;
-    proget?: ProGetConf;
+    proget?: IProGetConf;
     retry?: number;
-    registry: BowerConfigRegistry;
+    registry: IBowerConfigRegistry;
     resolvers?: string[];
 }
 
-declare interface BowerConfigRegistry {
+declare interface IBowerConfigRegistry {
     default?: string;
     publish?: string;
     register?: string;
